@@ -1,0 +1,8 @@
+.netlify
+.ntli
+node_modules
+.cache
+dev-model.gql
+keys
+.env
+.DS_Store
