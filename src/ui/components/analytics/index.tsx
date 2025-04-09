@@ -80,7 +80,7 @@ export const Analytics = () => {
           minute: "numeric",
           hour12: true,
         })}
-        . 
+        .
       </p>
       <p className="tw-text-sm">Numbers are approximate.</p>
 
