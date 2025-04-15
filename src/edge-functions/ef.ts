@@ -74,7 +74,7 @@ const browserMappings: {
     shortName: "yandex",
     versionType: "double"
   },
-  "QQ Browser": {
+  "QQBrowser": {
     shortName: "qq",
     versionType: "double"
   },
