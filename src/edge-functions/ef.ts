@@ -22,61 +22,67 @@ export const config = {
 // and the type of version (single or double)
 const browserMappings: {
   [key: string]: {
-    desktopName?: string;
-    mobileName?: string;
+    shortName?: string;
     versionType: string;
   };
 } = {
   "Chrome": {
-    desktopName: "chrome",
-    mobileName: "chrome_android",
+    shortName: "chrome",
+    versionType: "single"
+  },
+  "Mobile Chrome": {
+    shortName: "chrome_android",
     versionType: "single"
   },
   "Edge": {
-    desktopName: "edge",
+    shortName: "edge",
     versionType: "single"
   },
   "Firefox": {
-    desktopName: "firefox",
-    mobileName: "firefox_android",
+    shortName: "firefox",
+    versionType: "single"
+  },
+  "Mobile Firefox": {
+    shortName: "firefox_android",
     versionType: "single"
   },
   "Safari": {
-    desktopName: "safari",
+    shortName: "safari",
     versionType: "double"
   },
   "Mobile Safari": {
-    mobileName: "safari_ios",
+    shortName: "safari_ios",
     versionType: "double"
   },
   "Opera": {
-    desktopName: "opera",
-    mobileName: "opera_android",
+    shortName: "opera",
+    versionType: "single"
+  },
+  "Opera Mobi": {
+    shortName: "opera_android",
     versionType: "single"
   },
   "Samsung Internet": {
-    mobileName: "samsung",
+    shortName: "samsung",
     versionType: "double"
   },
   "Chrome WebView": {
-    mobileName: "webview_android",
+    shortName: "webview_android",
     versionType: "single"
   },
   "Yandex": {
-    mobileName: "yandex",
+    shortName: "yandex",
     versionType: "double"
   },
   "QQ Browser": {
-    mobileName: "qq",
+    shortName: "qq",
     versionType: "double"
   },
-  "UC Browser": {
-    mobileName: "uc",
+  "UCBrowser": {
+    shortName: "uc",
     versionType: "double"
   },
 }
-
-
 
 const getBrowserNameAndVersion = (ua: IResult): {
   browserName: string;
@@ -93,14 +99,8 @@ const getBrowserNameAndVersion = (ua: IResult): {
   }
 
   const browserMapping = browserMappings[ua.browser.name];
+  result.browserName = browserMapping.shortName ?? ua.browser.name;
 
-  if (!ua.device.type) {
-    // Desktop browser
-    result.browserName = browserMapping.desktopName ?? ua.browser.name;
-  } else {
-    // Mobile browser
-    result.browserName = browserMapping.mobileName ?? ua.browser.name;
-  }
   // Split the version string into parts
   const versionParts = ua.browser.version.split(".");
 
