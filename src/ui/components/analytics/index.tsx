@@ -66,7 +66,7 @@ export const Analytics = () => {
 
   return (
     <Card>
-      <CardTitle>Browser traffic analytics</CardTitle>
+      <CardTitle>Baseline Browser Analytics</CardTitle>
       <br />
       <h3>Traffic in the last 7 days</h3>
       <p className="tw-text-sm">
@@ -80,9 +80,10 @@ export const Analytics = () => {
           minute: "numeric",
           hour12: true,
         })}
-        . 
+        .
       </p>
       <p className="tw-text-sm">Numbers are approximate.</p>
+      <pre>{JSON.stringify(analyticsData.data)}</pre>
 
       {/* BASELINE: some beautiful chart and stuff using the data from analyticsData.data */}
       <Button

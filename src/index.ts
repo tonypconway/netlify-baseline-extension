@@ -5,7 +5,7 @@ const extension = new NetlifyExtension();
 extension.addEdgeFunctions("./src/edge-functions", {
   prefix: "baseline",
   shouldInjectFunction: ({ name }) => {
-    if (name === "ef" && process.env["BASELINE_ANALYTICS"]) {
+    if (name === "ef") {
       return true;
     }
     return false;

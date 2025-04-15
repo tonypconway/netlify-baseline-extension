@@ -5,6 +5,7 @@ config:
   scopes:
     site: ["read", "write"]
     ui: ["read", "write"]
+    blob: ["read", "write"]
 
   # set this to true to add a global require shim to esbuild. Workaround for https://github.com/evanw/esbuild/issues/1921
   use_cjs_shims: false

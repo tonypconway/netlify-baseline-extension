@@ -1,4 +1,5 @@
 {
+  "testing.automaticallyOpenPeekView": "never",
   "deno.enable": true,
   "deno.enablePaths": [
     "src/edge-functions"
