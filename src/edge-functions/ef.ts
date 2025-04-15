@@ -148,9 +148,8 @@ async function incrementInBlob(userAgent: string): Promise<void> {
   current[browserName][version]["count"] += 1;
   // END: Baseline code
 
-  await store.setJSON(key, current).then((res) => {
-    console.log(res);
-    console.log("Incremented count for " + key);
+  await store.setJSON(key, current).then(() => {
+    console.log("Incremented count for " + key + ' using ' + JSON.stringify(current));
   });
 
   // clean up all stats excluding last 7 days
