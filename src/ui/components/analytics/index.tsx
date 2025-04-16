@@ -7,6 +7,52 @@ import {
 import { trpc } from "../../trpc";
 import * as React from "react";
 
+type BrowserData = {
+  [browserName: string]: {
+    [version: string]: {
+      count: number;
+    };
+  };
+}
+
+const flattenDays = (data: BrowserData[]): BrowserData => {
+  const output = {} as BrowserData;
+  data.forEach((day) => {
+    Object.entries(day).forEach(([browserName, versions]) => {
+      if (!output[browserName]) {
+        output[browserName] = {};
+      }
+      Object.entries(versions).forEach(([version, { count }]) => {
+        if (!output[browserName][version]) {
+          output[browserName][version] = { count: 0 };
+        }
+        output[browserName][version].count += count;
+      });
+    });
+  });
+  return output;
+}
+
+const processAnalyticsData = (data: BrowserData[]) => {
+  const totalImpressions: number = 0;
+  let nextYear = new Date().getFullYear() + 1;
+  let baselineYears = [...Array(nextYear).keys()].slice(2016).map(year => {
+    return {
+      year: year,
+      count: 0
+    }
+  });
+
+  const flattenedData = flattenDays(data);
+
+  return {
+    flattenedData: flattenedData,
+    baselineYears: baselineYears,
+    totalImpressions: totalImpressions
+  }
+
+}
+
 export const Analytics = () => {
   const trpcUtils = trpc.useUtils();
   const siteSettingsQuery = trpc.siteSettings.query.useQuery();
@@ -83,7 +129,12 @@ export const Analytics = () => {
         .
       </p>
       <p className="tw-text-sm">Numbers are approximate.</p>
-      <pre>{JSON.stringify(analyticsData.data, null, 2)}</pre>
+      <pre>{JSON.stringify(
+        processAnalyticsData(
+          analyticsData.data
+        )
+        , null, 2)
+      }</pre>
 
       {/* BASELINE: some beautiful chart and stuff using the data from analyticsData.data */}
       <Button
