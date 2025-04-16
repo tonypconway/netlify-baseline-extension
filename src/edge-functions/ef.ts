@@ -98,7 +98,8 @@ const getBrowserNameAndVersion = (ua: IResult): {
     throw new Error(`Browser ${ua.browser.name} not recognized`);
   }
 
-  if (ua.device.type === "mobile" && ua.device.vendor === "Apple" && !ua.browser.name.includes("Mobile Safari")) {
+  if (ua.device.type === "mobile" && ua.device.vendor === "Apple" && ua.browser.name != "Mobile Safari") {
+    console.log("detected iOS device with non-Safari browser");
     // For non-Safari iOS browsers, we need to use the OS version
     // instead of the browser version, because the browser version
     // doesn't tell us anything about which version of WebKit
