@@ -132,7 +132,8 @@ export const appRouter = router({
         }, {} as BrowserData);
       })
     );
-    return analyticsData.reverse();
+    analyticsData.reverse();
+    return analyticsData;
   }),
 });
 

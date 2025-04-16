@@ -98,6 +98,20 @@ const getBrowserNameAndVersion = (ua: IResult): {
     throw new Error(`Browser ${ua.browser.name} not recognized`);
   }
 
+  if (ua.device.type === "mobile" && ua.device.vendor === "Apple" && !ua.browser.name.includes("Mobile Safari")) {
+    // For non-Safari iOS browsers, we need to use the OS version
+    // instead of the browser version, because the browser version
+    // doesn't tell us anything about which version of WebKit
+    // is being used.
+    const versionParts = ua.os.version.split(".");
+    result.version =
+      versionParts[1] == 0
+        ? `${versionParts[0]}`
+        : `${versionParts[0]}.${versionParts[1]}`;
+    result.browserName = "safari_ios";
+    return result;
+  }
+
   const browserMapping = browserMappings[ua.browser.name];
   result.browserName = browserMapping.shortName ?? ua.browser.name;
 
