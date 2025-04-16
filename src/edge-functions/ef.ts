@@ -14,7 +14,7 @@ export default (request: Request) => {
 
 export const config = {
   path: "/*",
-  excludePath: ["**/*.js*", "**/*.css*", "**/*.png*", "**/*.jpg*"],
+  excludePath: ["**/*.js*", "**/*.css*", "**/*.png*", "**/*.jpg*", "**/*.jpeg*", "**/*.gif*", "**/*.svg*", "**/*.webp*", "**/*.ico*", "**/*.woff2*", "**/*.woff*", "**/*.ttf*", "**/*.eot*", "**/*.otf*"],
   onError: "bypass",
 };
 
@@ -63,7 +63,7 @@ const browserMappings: {
     versionType: "single"
   },
   "Samsung Internet": {
-    shortName: "samsung",
+    shortName: "samsunginternet_android",
     versionType: "double"
   },
   "Chrome WebView": {
@@ -71,15 +71,15 @@ const browserMappings: {
     versionType: "single"
   },
   "Yandex": {
-    shortName: "yandex",
+    shortName: "ya_android",
     versionType: "double"
   },
   "QQBrowser": {
-    shortName: "qq",
+    shortName: "qq_android",
     versionType: "double"
   },
   "UCBrowser": {
-    shortName: "uc",
+    shortName: "uc_android",
     versionType: "double"
   },
 }

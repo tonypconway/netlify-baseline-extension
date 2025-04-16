@@ -83,7 +83,7 @@ export const Analytics = () => {
         .
       </p>
       <p className="tw-text-sm">Numbers are approximate.</p>
-      <pre>{JSON.stringify(analyticsData.data)}</pre>
+      <pre>{JSON.stringify(analyticsData.data, null, 2)}</pre>
 
       {/* BASELINE: some beautiful chart and stuff using the data from analyticsData.data */}
       <Button

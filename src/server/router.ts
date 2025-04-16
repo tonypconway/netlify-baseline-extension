@@ -3,6 +3,14 @@ import { procedure, router } from "./trpc.js";
 import { SiteSettings } from "../schema/site-configuration.js";
 import { z } from "zod";
 
+type BrowserData = {
+  [browserName: string]: {
+    [version: string]: {
+      count: number;
+    };
+  };
+}
+
 export const appRouter = router({
   siteSettings: {
     query: procedure.query(async ({ ctx: { teamId, siteId, client } }) => {
@@ -103,22 +111,28 @@ export const appRouter = router({
           await Promise.all(
             blobs.map(
               async ({ key }) =>
-                ((await store.get(key, { type: "json" })) ?? {}) as Record<
-                  string,
-                  number
-                > // PUT SOME VALID TYPE HERE FOR THE JSON, OR TYPESCRIPT COMPLAINS
+                ((await store.get(key, { type: "json" })) ?? {}) as BrowserData
             )
           )
-        ).reduce((acc, data) => {
+        ).reduce((acc: BrowserData, data: BrowserData) => {
           // START: Baseline code
-          void data; // this is your JSON, do with it what you want
-          void acc; // update the acc;
+          Object.entries(data).forEach(([browserName, browsers]) => {
+            if (!acc[browserName]) {
+              acc[browserName] = {};
+            }
+            Object.entries(browsers).forEach(([version, versionData]) => {
+              if (!acc[browserName][version]) {
+                acc[browserName][version] = { count: 0 };
+              }
+              acc[browserName][version].count += versionData.count;
+            });
+          })
           // END: Baseline code
           return acc;
-        }, {} as Record<string, { chrome: number; firefox: number }>); // PUT WHATEVER TYPE YOU TO RETURN HERE
+        }, {} as BrowserData);
       })
     );
-    return analyticsData;
+    return analyticsData.reverse();
   }),
 });
 
