@@ -5,6 +5,7 @@ import type { IResult } from "https://deno.land/x/ua_parser_js@2.0.3/src/main/ua
 import { UAParser } from "https://deno.land/x/ua_parser_js@2.0.3/src/main/ua-parser.mjs";
 
 export default (request: Request) => {
+  console.log(request.url);
   const userAgent = request.headers.get("user-agent");
   if (userAgent === null || userAgent === "") {
     return;
@@ -14,40 +15,43 @@ export default (request: Request) => {
 
 export const config = {
   path: "/*",
-  excludePath: [
-    "**/*.js",
-    "**/*.css",
-    "**/*.png",
-    "**/*.jpg",
-    "**/*.jpeg",
-    "**/*.gif",
-    "**/*.svg",
-    "**/*.webp",
-    "**/*.ico",
-    "**/*.woff2",
-    "**/*.woff",
-    "**/*.ttf",
-    "**/*.eot",
-    "**/*.otf",
-    "**/*.mp4",
-    "**/*.mp3",
-    "**/*.wav",
-    "**/*.ogg",
-    "**/*.m4a",
-    "**/*.aac",
-    "**/*.flac",
-    "**/*.opus",
-    "**/*.webm",
-    "**/*.mov",
-    "**/*.avi",
-    "**/*.wmv",
-    "**/*.mkv",
-    "**/*.webp",
-    "**/*.avif",
-    "**/*.bmp",
-    "**/*.tiff",
-    "**/*.tif",
-    "**/*.raw",
+  excludedPath: [
+    "/*.js",
+    "/*.mjs",
+    "/*.ts",
+    "/*.tsx",
+    "/*.css",
+    "/*.png",
+    "/*.jpg",
+    "/*.jpeg",
+    "/*.gif",
+    "/*.svg",
+    "/*.webp",
+    "/*.ico",
+    "/*.woff2",
+    "/*.woff",
+    "/*.ttf",
+    "/*.eot",
+    "/*.otf",
+    "/*.mp4",
+    "/*.mp3",
+    "/*.wav",
+    "/*.ogg",
+    "/*.m4a",
+    "/*.aac",
+    "/*.flac",
+    "/*.opus",
+    "/*.webm",
+    "/*.mov",
+    "/*.avi",
+    "/*.wmv",
+    "/*.mkv",
+    "/*.webp",
+    "/*.avif",
+    "/*.bmp",
+    "/*.tiff",
+    "/*.tif",
+    "/*.raw",
   ],
   onError: "bypass",
 };
@@ -130,6 +134,7 @@ const getBrowserNameAndVersion = (ua: IResult): {
 
   if (!browserMappings.hasOwnProperty(ua.browser.name)) {
     throw new Error(`Browser ${ua.browser.name} not recognized`);
+    return { browserName: "unknown", version: "unknown" };
   }
 
   if (ua.device.type === "mobile" && ua.device.vendor === "Apple" && ua.browser.name != "Mobile Safari") {
@@ -185,20 +190,18 @@ async function incrementInBlob(userAgent: string): Promise<void> {
   const ua = UAParser(userAgent) as IResult;
   const { browserName, version } = getBrowserNameAndVersion(ua);
   if (!current.hasOwnProperty(browserName)) {
-    console.log(`browserName: ${browserName} not found.  Setting ${version} as an empty object.`);
     current[browserName] = {};
   }
   if (!current[browserName].hasOwnProperty(version)) {
-    console.log(`browserName: ${browserName} exists, but ${version} not found.  Setting with count 0.`);
     current[browserName][version] = {
       "count": 0
     };
-  }
+  };
   current[browserName][version]["count"] += 1;
   // END: Baseline code
 
   await store.setJSON(key, current).then(() => {
-    console.log(`Incremented count for ${key} using ${JSON.stringify(current)}`);
+    console.log(`Incremented ${browserName} version ${version} count in key ${key} by 1`);
   });
 
   // clean up all stats excluding last 7 days
