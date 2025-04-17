@@ -15,14 +15,14 @@ type BrowserData = {
   };
 }
 
-let bbm: any;
+// let bbm: any;
 
-const fetchBBM = async () => {
-  const response = await fetch('https://web-platform-dx.github.io/baseline-browser-mapping/with_downstream/all_versions_object.json');
-  bbm = await response.json();
-};
+// const fetchBBM = async () => {
+//   const response = await fetch('https://web-platform-dx.github.io/baseline-browser-mapping/with_downstream/all_versions_object.json');
+//   bbm = await response.json();
+// };
 
-bbm = fetchBBM();
+// bbm = fetchBBM();
 
 const flattenDays = (data: BrowserData[]): BrowserData => {
   const output = {} as BrowserData;
@@ -42,7 +42,7 @@ const flattenDays = (data: BrowserData[]): BrowserData => {
   return output;
 }
 
-const processAnalyticsData = (data: BrowserData[]) => {
+const processAnalyticsData = (data: BrowserData[], bbm: any) => {
   let totalRecognisedImpressions: number = 0;
   let totalBaselineImpressions: number = 0;
   let totalUnrecognisedImpressions: number = 0;
@@ -86,6 +86,7 @@ export const Analytics = () => {
   const trpcUtils = trpc.useUtils();
   const siteSettingsQuery = trpc.siteSettings.query.useQuery();
   const analyticsData = trpc.analytics.useQuery();
+  const bbm = trpc.bbm.useQuery();
   const setAnalyticsModeMutation =
     trpc.siteSettings.setAnalyticsMode.useMutation({
       onSuccess: async () => {
@@ -160,7 +161,8 @@ export const Analytics = () => {
       <p className="tw-text-sm">Numbers are approximate.</p>
       <pre>{JSON.stringify(
         processAnalyticsData(
-          analyticsData.data
+          analyticsData.data,
+          bbm.data
         )
         , null, 2)
       }</pre>

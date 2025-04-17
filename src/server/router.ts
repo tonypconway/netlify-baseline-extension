@@ -90,6 +90,12 @@ export const appRouter = router({
       }),
   },
 
+  bbm: procedure.query(async () => {
+    const response = await fetch("https://web-platform-dx.github.io/baseline-browser-mapping/with_downstream/all_versions_object.json");
+    const bbm = await response.json();
+    return bbm;
+  }),
+
   analytics: procedure.query(async ({ ctx: { teamId, siteId, client } }) => {
     if (!teamId || !siteId) {
       throw new TRPCError({
