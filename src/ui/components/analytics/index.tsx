@@ -15,14 +15,30 @@ type BrowserData = {
   };
 }
 
-// let bbm: any;
+const test: boolean = true;
 
-// const fetchBBM = async () => {
-//   const response = await fetch('https://web-platform-dx.github.io/baseline-browser-mapping/with_downstream/all_versions_object.json');
-//   bbm = await response.json();
-// };
+const baselineYearsTest: Object = {
+  "2016": { "year": 2016, "count": 10 },
+  "2017": { "year": 2017, "count": 10 },
+  "2018": { "year": 2018, "count": 20 },
+  "2019": { "year": 2019, "count": 30 },
+  "2020": { "year": 2020, "count": 50 },
+  "2021": { "year": 2021, "count": 1000 },
+  "2022": { "year": 2022, "count": 10000 },
+  "2023": { "year": 2023, "count": 20000 },
+  "2024": { "year": 2024, "count": 20000 },
+  "2025": { "year": 2025, "count": 5000 }
+}
 
-// bbm = fetchBBM();
+const testData: Object = {
+  baselineYears: baselineYearsTest,
+  totalRecognisedImpressions: Object.entries(baselineYearsTest).reduce((acc, [_, { count }]) => acc + count, 0),
+  totalUnrecognisedImpressions: 1000,
+  waCompatibleWeightsTest: {
+    true: 52000,
+    false: 4120
+  }
+}
 
 const flattenDays = (data: BrowserData[]): BrowserData => {
   const output = {} as BrowserData;
@@ -43,8 +59,6 @@ const flattenDays = (data: BrowserData[]): BrowserData => {
 }
 
 const processAnalyticsData = (data: BrowserData[], bbm: any) => {
-  let totalRecognisedImpressions: number = 0;
-  let totalBaselineImpressions: number = 0;
   let totalUnrecognisedImpressions: number = 0;
   const waCompatibleWeights: { [key: string]: number } = {
     true: 0,
@@ -59,27 +73,29 @@ const processAnalyticsData = (data: BrowserData[], bbm: any) => {
   const flattenedData = flattenDays(data);
 
   Object.entries(flattenedData).forEach(([browserName, versions]) => {
-    if (bbm[browserName]) {
-      Object.entries(versions).forEach(([version, { count }]) => {
+    // if (bbm[browserName]) {
+    Object.entries(versions).forEach(([version, { count }]) => {
+      if (bbm[browserName] && bbm[browserName][version]) {
         const versionYear: string = bbm[browserName][version]?.year;
         const waCompatible: boolean = bbm[browserName][version]?.waCompatible;
         baselineYears[versionYear].count += count;
-        totalRecognisedImpressions += count;
-        totalBaselineImpressions += count;
         waCompatibleWeights[waCompatible.toString()] += count;
-      })
-    } else {
-      totalUnrecognisedImpressions += Object.values(versions).reduce((acc, { count }) => acc + count, 0);
-    };
+      }
+      else totalUnrecognisedImpressions += Object.values(versions).reduce((acc, { count }) => acc + count, 0);
+    })
+    // } else totalUnrecognisedImpressions += Object.values(versions).reduce((acc, { count }) => acc + count, 0);;
   });
 
-  return {
-    flattenedData: flattenedData,
-    baselineYears: baselineYears,
-    waCompatibleWeights: waCompatibleWeights,
-    totalRecognisedImpressions: totalRecognisedImpressions,
-    totalUnrecognisedImpressions: totalUnrecognisedImpressions,
-  }
+  const totalRecognisedImpressions = Object.values(baselineYears).reduce((acc, { count }) => acc + count, 0);
+
+  return test ?
+    testData :
+    {
+      baselineYears: baselineYears,
+      waCompatibleWeights: waCompatibleWeights,
+      totalRecognisedImpressions: totalRecognisedImpressions,
+      totalUnrecognisedImpressions: totalUnrecognisedImpressions,
+    }
 }
 
 export const Analytics = () => {
