@@ -15,26 +15,35 @@ type BrowserData = {
   };
 }
 
+type BaselineYears = { [key: string]: { year: number; count: number; }; }
+
+type ProcessedData = {
+  baselineYears: BaselineYears;
+  waCompatibleWeights: { [key: string]: number; };
+  totalRecognisedImpressions: number;
+  totalUnrecognisedImpressions: number;
+}
+
 const test: boolean = true;
 
-const baselineYearsTest: Object = {
+const baselineYearsTest: BaselineYears = {
   "2016": { "year": 2016, "count": 10 },
   "2017": { "year": 2017, "count": 10 },
   "2018": { "year": 2018, "count": 20 },
   "2019": { "year": 2019, "count": 30 },
-  "2020": { "year": 2020, "count": 50 },
-  "2021": { "year": 2021, "count": 1000 },
+  "2020": { "year": 2020, "count": 1000 },
+  "2021": { "year": 2021, "count": 5000 },
   "2022": { "year": 2022, "count": 10000 },
-  "2023": { "year": 2023, "count": 20000 },
-  "2024": { "year": 2024, "count": 20000 },
-  "2025": { "year": 2025, "count": 5000 }
+  "2023": { "year": 2023, "count": 15000 },
+  "2024": { "year": 2024, "count": 25000 },
+  "2025": { "year": 2025, "count": 15000 }
 }
 
-const testData: Object = {
+const testData: ProcessedData = {
   baselineYears: baselineYearsTest,
   totalRecognisedImpressions: Object.entries(baselineYearsTest).reduce((acc, [_, { count }]) => acc + count, 0),
   totalUnrecognisedImpressions: 1000,
-  waCompatibleWeightsTest: {
+  waCompatibleWeights: {
     true: 52000,
     false: 4120
   }
@@ -58,7 +67,7 @@ const flattenDays = (data: BrowserData[]): BrowserData => {
   return output;
 }
 
-const processAnalyticsData = (data: BrowserData[], bbm: any) => {
+const processAnalyticsData = (data: BrowserData[], bbm: any): ProcessedData => {
   let totalUnrecognisedImpressions: number = 0;
   const waCompatibleWeights: { [key: string]: number } = {
     true: 0,
@@ -103,6 +112,10 @@ export const Analytics = () => {
   const siteSettingsQuery = trpc.siteSettings.query.useQuery();
   const analyticsData = trpc.analytics.useQuery();
   const bbm = trpc.bbm.useQuery();
+  const processedData: ProcessedData = processAnalyticsData(
+    analyticsData.data ?? [],
+    bbm.data ?? {}
+  );
   const setAnalyticsModeMutation =
     trpc.siteSettings.setAnalyticsMode.useMutation({
       onSuccess: async () => {
@@ -175,13 +188,36 @@ export const Analytics = () => {
         .
       </p>
       <p className="tw-text-sm">Numbers are approximate.</p>
-      <pre>{JSON.stringify(
-        processAnalyticsData(
-          analyticsData.data,
-          bbm.data
-        )
-        , null, 2)
-      }</pre>
+      <div style={{ height: '500px', width: '200px' }}>
+        {
+          Object.entries(processedData.baselineYears)
+            // Only show a year if it represents greater than 0.05% of overall impressions
+            .filter(([_, { count }]) => count > (processedData.totalRecognisedImpressions * 0.0005))
+            .map(([year, { count }], index, array) => (
+              <div
+                key={year}
+                style={{
+                  height: `${(count / processedData.totalRecognisedImpressions) * 100}%`,
+                  borderBottom: '1px solid lightgray',
+                  backgroundColor: `rgba(0, 128, 0, ${(array.length - index) / array.length})`, // Dark green to light green
+                  color: 'white',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <span>Baseline {year}
+                  ({Math.round(count / processedData.totalRecognisedImpressions * 100)}%)
+                  ({Math.round(
+                    array
+                      .slice(index)
+                      .reduce((acc, [_, { count }]) => acc + count, 0) /
+                    processedData.totalRecognisedImpressions *
+                    100
+                  )}%)</span>
+              </div>
+            ))}
+      </div>
 
       {/* BASELINE: some beautiful chart and stuff using the data from analyticsData.data */}
       <Button
