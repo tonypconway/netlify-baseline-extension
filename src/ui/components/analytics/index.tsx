@@ -46,7 +46,7 @@ const testData: ProcessedData = {
   totalRecognisedImpressions: Object.entries(baselineYearsTest).reduce((acc, [_, { count }]) => acc + count, 0),
   totalUnrecognisedImpressions: 1000,
   waCompatibleWeights: {
-    true: 52000,
+    true: 66950,
     false: 4120
   }
 }
@@ -84,7 +84,6 @@ const processAnalyticsData = (data: BrowserData[], bbm: any): ProcessedData => {
   const flattenedData = flattenDays(data);
 
   Object.entries(flattenedData).forEach(([browserName, versions]) => {
-    // if (bbm[browserName]) {
     Object.entries(versions).forEach(([version, { count }]) => {
       if (bbm[browserName] && bbm[browserName][version]) {
         const versionYear: string = bbm[browserName][version]?.year;
@@ -94,7 +93,6 @@ const processAnalyticsData = (data: BrowserData[], bbm: any): ProcessedData => {
       }
       else totalUnrecognisedImpressions += Object.values(versions).reduce((acc, { count }) => acc + count, 0);
     })
-    // } else totalUnrecognisedImpressions += Object.values(versions).reduce((acc, { count }) => acc + count, 0);;
   });
 
   const totalRecognisedImpressions = Object.values(baselineYears).reduce((acc, { count }) => acc + count, 0);
@@ -190,35 +188,82 @@ export const Analytics = () => {
         .
       </p>
       <p className="tw-text-sm">Numbers are approximate.</p>
-      <div style={{ height: '500px', width: '200px' }}>
-        {
-          Object.entries(processedData.baselineYears)
-            // Only show a year if it represents greater than 0.05% of overall impressions
-            .filter(([_, { count }]) => count > (processedData.totalRecognisedImpressions * 0.0005))
-            .map(([year, { count }], index, array) => (
-              <div
-                key={year}
-                style={{
-                  height: `${(count / processedData.totalRecognisedImpressions) * 100}%`,
-                  borderBottom: '1px solid lightgray',
-                  backgroundColor: `rgba(0, 128, 0, ${(array.length - index) / array.length})`, // Dark green to light green
-                  color: 'white',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
+      <div style={{ display: 'flex', gap: '2em' }}>
+        <div>
+          <h3>Baseline yearly feature set support</h3>
+          <p>
+            This table shows the percentage of your users that can support
+            all the features that were Baseline Newly available at the end of
+            each calendar year back to 2016.
+          </p>
+          <div style={{ width: '200px', marginTop: '1em' }}>
+            {
+              Object.entries(processedData.baselineYears)
+                // Only show a year if it represents greater than 0.05% of overall impressions
+                .filter(([_, { count }]) => count > (processedData.totalRecognisedImpressions * 0.0005))
+                .map(([year, { count }], index, array) => (
+                  <div
+                    key={year}
+                    style={{
+                      height: `${(count / processedData.totalRecognisedImpressions) * 500}px`,
+                      minHeight: '2.1em',
+                      padding: '0.2em 0.5em',
+                      borderBottom: '1px solid lightgray',
+                      backgroundColor: `rgba(0, 0, 128, ${(array.length - index) / array.length})`, // Dark green to light green
+                      color: 'white',
+                      display: 'flex',
+                      alignItems: 'top',
+                      justifyContent: 'space-between',
+                    }}
+                  >
+                    <span>Baseline {year} </span>
+                    <span>({Math.round(
+                      array
+                        .slice(index)
+                        .reduce((acc, [_, { count }]) => acc + count, 0) /
+                      processedData.totalRecognisedImpressions *
+                      100
+                    )}%)</span>
+                  </div>
+                ))}
+          </div>
+        </div>
+        <div>
+          <div style={{ marginTop: '1em' }}>
+            <h3>Baseline Widely available support</h3>
+            <p>
+              This table shows the percentage of impressions you delivered to a browser that supports the Baseline Widely available feature set.
+            </p>
+            <div style={{ width: '200px', height: '500px', marginTop: '1em' }}>
+              <div style={{
+                backgroundColor: 'rgba(0, 128, 0, 1)',
+                height: `${processedData.waCompatibleWeights.true / processedData.totalRecognisedImpressions * 100}%`,
+                color: 'white',
+                display: 'flex',
+              }}
               >
-                <span>Baseline {year}
-                  ({Math.round(count / processedData.totalRecognisedImpressions * 100)}%)
-                  ({Math.round(
-                    array
-                      .slice(index)
-                      .reduce((acc, [_, { count }]) => acc + count, 0) /
-                    processedData.totalRecognisedImpressions *
-                    100
-                  )}%)</span>
+                <span>Widely available supported ({Math.round(processedData.waCompatibleWeights.true / processedData.totalRecognisedImpressions * 100)}%)</span>
               </div>
-            ))}
+              <div style={{
+                backgroundColor: 'rgb(183, 91, 4)',
+                height: `${processedData.waCompatibleWeights.false / processedData.totalRecognisedImpressions * 100}%`,
+                color: 'white',
+                display: 'flex',
+              }}>Widely available unsupported ({Math.round(processedData.waCompatibleWeights.false / processedData.totalRecognisedImpressions * 100)}%)</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div>
+        <h3 className="tw-mt-4">Unrecognised impressions</h3>
+        <p className="tw-text-sm">
+          {processedData.totalUnrecognisedImpressions} impressions were from browsers that this extension could not categorise.
+        </p>
+        <p className="tw-text-sm">
+          {processedData.totalRecognisedImpressions} impressions were from browsers that this extension could categorise.
+        </p>
       </div>
 
       {/* BASELINE: some beautiful chart and stuff using the data from analyticsData.data */}
@@ -229,28 +274,30 @@ export const Analytics = () => {
       >
         Disable analytics and deploy site
       </Button>
-      {showAreYouSure && (
-        <div className="tw-mt-4 tw-ml-4">
-          <h3>Are you sure?</h3>
-          <div className="tw-mt-4 tw-flex tw-gap-4">
-            <Button level="secondary" onClick={() => setShowAreYouSure(false)}>
-              Cancel
-            </Button>
-            <Button
-              variant="danger"
-              onClick={async () => {
-                await setAnalyticsModeMutation.mutateAsync({
-                  analyticsMode: false,
-                  redeploy: true,
-                });
-                setShowAreYouSure(false);
-              }}
-            >
-              Confirm
-            </Button>
+      {
+        showAreYouSure && (
+          <div className="tw-mt-4 tw-ml-4">
+            <h3>Are you sure?</h3>
+            <div className="tw-mt-4 tw-flex tw-gap-4">
+              <Button level="secondary" onClick={() => setShowAreYouSure(false)}>
+                Cancel
+              </Button>
+              <Button
+                variant="danger"
+                onClick={async () => {
+                  await setAnalyticsModeMutation.mutateAsync({
+                    analyticsMode: false,
+                    redeploy: true,
+                  });
+                  setShowAreYouSure(false);
+                }}
+              >
+                Confirm
+              </Button>
+            </div>
           </div>
-        </div>
-      )}
-    </Card>
+        )
+      }
+    </Card >
   );
 };
