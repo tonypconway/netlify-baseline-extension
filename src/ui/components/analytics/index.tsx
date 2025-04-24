@@ -206,14 +206,15 @@ export const Analytics = () => {
                     key={year}
                     style={{
                       height: `${(count / processedData.totalRecognisedImpressions) * 500}px`,
+                      backgroundColor: `rgba(51, 103, 214, ${(array.length - index) / array.length})`, // Dark green to light green
                       minHeight: '2.1em',
                       padding: '0.2em 0.5em',
-                      borderBottom: '1px solid lightgray',
-                      backgroundColor: `rgba(0, 0, 128, ${(array.length - index) / array.length})`, // Dark green to light green
+                      borderBottom: `${index != array.length - 1 ? '1px solid darkgray' : 'none'}`,
                       color: 'white',
                       display: 'flex',
                       alignItems: 'top',
-                      justifyContent: 'space-between',
+                      justifyContent: 'left',
+                      gap: '0.2em',
                     }}
                   >
                     <span>Baseline {year} </span>
@@ -229,15 +230,17 @@ export const Analytics = () => {
           </div>
         </div>
         <div>
-          <div style={{ marginTop: '1em' }}>
+          <div>
             <h3>Baseline Widely available support</h3>
             <p>
               This table shows the percentage of impressions you delivered to a browser that supports the Baseline Widely available feature set.
             </p>
             <div style={{ width: '200px', height: '500px', marginTop: '1em' }}>
               <div style={{
-                backgroundColor: 'rgba(0, 128, 0, 1)',
+                backgroundColor: 'rgba(9, 153, 73, 1)',
                 height: `${processedData.waCompatibleWeights.true / processedData.totalRecognisedImpressions * 100}%`,
+                minHeight: '3.5em',
+                padding: '0.2em 0.5em',
                 color: 'white',
                 display: 'flex',
               }}
@@ -245,11 +248,15 @@ export const Analytics = () => {
                 <span>Widely available supported ({Math.round(processedData.waCompatibleWeights.true / processedData.totalRecognisedImpressions * 100)}%)</span>
               </div>
               <div style={{
-                backgroundColor: 'rgb(183, 91, 4)',
+                backgroundColor: 'darkgrey',
                 height: `${processedData.waCompatibleWeights.false / processedData.totalRecognisedImpressions * 100}%`,
+                minHeight: '3.5em',
+                padding: '0.2em 0.5em',
                 color: 'white',
                 display: 'flex',
-              }}>Widely available unsupported ({Math.round(processedData.waCompatibleWeights.false / processedData.totalRecognisedImpressions * 100)}%)</div>
+              }}>
+                <span>Widely available unsupported ({Math.round(processedData.waCompatibleWeights.false / (processedData.totalRecognisedImpressions) * 100)}%)</span>
+              </div>
             </div>
           </div>
         </div>
@@ -257,12 +264,12 @@ export const Analytics = () => {
       </div>
 
       <div>
-        <h3 className="tw-mt-4">Unrecognised impressions</h3>
+        <h3>Notes on data used for these tables</h3>
         <p className="tw-text-sm">
-          {processedData.totalUnrecognisedImpressions} impressions were from browsers that this extension could not categorise.
+          This extension uses a Netlify edge function which is triggered by all the requests that your site receives that are not for image, video, audio, script, or style resources. The edge function uses <a href="https://uaparser.dev/">UAParser.js</a> to parse the user agent string and determine the browser and its version. The data is stored in a Netlify blob with a 7-day window. The browser names and versions are matched to Baseline years and Widely available support status using data from the W3C WebDX Community Group's <a href="https://npmjs.com/baseline-browser-mapping">baseline-browser-mapping</a> module.
         </p>
         <p className="tw-text-sm">
-          {processedData.totalRecognisedImpressions} impressions were from browsers that this extension could categorise.
+          {processedData.totalRecognisedImpressions} requests were made to your site in the last 7 days from browsers that this extension could categorise. {processedData.totalUnrecognisedImpressions} impressions were from browsers that this extension could not categorise.
         </p>
       </div>
 
