@@ -1,5 +1,5 @@
-# Baseline
+# Web Platform Baseline extension
 
-THIS IS THE USER-FACING EXTENSION DESCRIPTION
+## WARNING
 
-IT APPEARS IN THE NETLIFY APP BEFORE THE EXTENSION IS INSTALLED
+This extension is still under active development.  The UI is under development and has not yet been tested at scale.  Please don't install this extension if you're not part of a test group!

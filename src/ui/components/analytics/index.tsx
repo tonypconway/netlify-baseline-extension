@@ -24,7 +24,9 @@ type ProcessedData = {
   totalUnrecognisedImpressions: number;
 }
 
-const test: boolean = true;
+const environment = process.env.NODE_ENV;
+
+const test: boolean = environment == "development" ? true : false;
 
 const baselineYearsTest: BaselineYears = {
   "2016": { "year": 2016, "count": 10 },
