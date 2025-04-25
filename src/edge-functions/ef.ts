@@ -16,6 +16,7 @@ export default (request: Request) => {
 export const config = {
   path: "/*",
   excludedPath: [
+    "/.netlify",
     "/*.js",
     "/*.mjs",
     "/*.ts",
