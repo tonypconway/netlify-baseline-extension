@@ -96,6 +96,12 @@ export const appRouter = router({
     return bbm;
   }),
 
+  debugUi: procedure.query(() => {
+    const debugString: string = Netlify.env.get("BASELINE_EXTENSION_DEBUG_UI") ?? "false";
+    const debug: boolean = ["true", "TRUE"].includes(debugString) ? true : false;
+    return debug
+  }),
+
   analytics: procedure.query(async ({ ctx: { teamId, siteId, client } }) => {
     if (!teamId || !siteId) {
       throw new TRPCError({

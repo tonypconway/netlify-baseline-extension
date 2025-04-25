@@ -10,10 +10,3 @@ directory = "src/endpoints"
 
 [[plugins]]
 package = "@netlify/netlify-plugin-netlify-extension"
-
-
-[context.production.environment]
-  NODE_ENV = "production"
-
-[context.dev.environment]
-  NODE_ENV = "development"

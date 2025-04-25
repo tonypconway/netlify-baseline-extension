@@ -5,7 +5,7 @@ import type { IResult } from "https://deno.land/x/ua_parser_js@2.0.3/src/main/ua
 import { UAParser } from "https://deno.land/x/ua_parser_js@2.0.3/src/main/ua-parser.mjs";
 
 export default (request: Request) => {
-  console.log(request.url);
+  if (debug) console.log(request.url);
   const userAgent = request.headers.get("user-agent");
   if (userAgent === null || userAgent === "") {
     return;
@@ -55,6 +55,8 @@ export const config = {
   ],
   onError: "bypass",
 };
+
+const debug = Netlify.env.get("BASELINE_EXTENSION_DEBUG_EF") ? Netlify.env.get("BASELINE_EXTENSION_DEBUG_EF") : "false";
 
 // This is a mapping of browser names from UAParser to the names used in the blob
 // and the type of version (single or double)
@@ -128,17 +130,18 @@ const getBrowserNameAndVersion = (ua: IResult): {
 } => {
 
   const result = {
-    browserName: "",
+    browserName: browserMappings[ua.browser.name]?.shortName ?? ua.browser.name,
     version: "",
   }
 
   if (!browserMappings.hasOwnProperty(ua.browser.name)) {
     throw new Error(`Browser ${ua.browser.name} not recognized`);
-    return { browserName: "unknown", version: "unknown" };
+    result.version = "unknown";
+    return result;
   }
 
   if (ua.device.type === "mobile" && ua.device.vendor === "Apple" && ua.browser.name != "Mobile Safari") {
-    console.log("detected iOS device with non-Safari browser");
+    if (debug) console.log("detected iOS device with non-Safari browser");
     // For non-Safari iOS browsers, we need to use the OS version
     // instead of the browser version, because the browser version
     // doesn't tell us anything about which version of WebKit
@@ -201,7 +204,7 @@ async function incrementInBlob(userAgent: string): Promise<void> {
   // END: Baseline code
 
   await store.setJSON(key, current).then(() => {
-    console.log(`Incremented ${browserName} version ${version} count in key ${key} by 1`);
+    if (debug) console.log(`Incremented ${browserName} version ${version} count in key ${key} by 1`);
   });
 
   // clean up all stats excluding last 7 days

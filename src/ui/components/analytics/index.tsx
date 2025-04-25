@@ -24,10 +24,6 @@ type ProcessedData = {
   totalUnrecognisedImpressions: number;
 }
 
-const environment = process.env.NODE_ENV;
-
-const test: boolean = environment == "development" ? true : false;
-
 const baselineYearsTest: BaselineYears = {
   "2016": { "year": 2016, "count": 10 },
   "2017": { "year": 2017, "count": 10 },
@@ -69,7 +65,7 @@ const flattenDays = (data: BrowserData[]): BrowserData => {
   return output;
 }
 
-const processAnalyticsData = (data: BrowserData[], bbm: any): ProcessedData => {
+const processAnalyticsData = (data: BrowserData[], bbm: any, debug: boolean): ProcessedData => {
   let totalUnrecognisedImpressions: number = 0;
   const waCompatibleWeights: { [key: string]: number } = {
     true: 0,
@@ -97,7 +93,7 @@ const processAnalyticsData = (data: BrowserData[], bbm: any): ProcessedData => {
 
   const totalRecognisedImpressions = Object.values(baselineYears).reduce((acc, { count }) => acc + count, 0);
 
-  return test ?
+  return debug ?
     testData :
     {
       baselineYears: baselineYears,
@@ -112,9 +108,11 @@ export const Analytics = () => {
   const siteSettingsQuery = trpc.siteSettings.query.useQuery();
   const analyticsData = trpc.analytics.useQuery();
   const bbm = trpc.bbm.useQuery();
+  const debug = trpc.debugUi.useQuery();
   const processedData: ProcessedData = processAnalyticsData(
     analyticsData.data ?? [],
-    bbm.data ?? {}
+    bbm.data ?? {},
+    debug.data ?? false
   );
   const setAnalyticsModeMutation =
     trpc.siteSettings.setAnalyticsMode.useMutation({
@@ -206,7 +204,7 @@ export const Analytics = () => {
                     key={year}
                     style={{
                       height: `${(count / processedData.totalRecognisedImpressions) * 500}px`,
-                      backgroundColor: `rgba(51, 103, 214, ${(array.length - index) / array.length})`, // Dark green to light green
+                      backgroundColor: `rgba(51, 103, 214, ${(array.length - index) / array.length})`, // Baseline Newly blue with decreasing transparency
                       minHeight: '2.1em',
                       padding: '0.2em 0.5em',
                       borderBottom: `${index != array.length - 1 ? '1px solid darkgray' : 'none'}`,
@@ -266,7 +264,7 @@ export const Analytics = () => {
       <div>
         <h3>Notes on data used for these tables</h3>
         <p className="tw-text-sm">
-          This extension uses a Netlify edge function which is triggered by all the requests that your site receives that are not for image, video, audio, script, or style resources. The edge function uses <a href="https://uaparser.dev/">UAParser.js</a> to parse the user agent string and determine the browser and its version. The data is stored in a Netlify blob with a 7-day window. The browser names and versions are matched to Baseline years and Widely available support status using data from the W3C WebDX Community Group's <a href="https://npmjs.com/baseline-browser-mapping">baseline-browser-mapping</a> module.
+          This extension uses a Netlify edge function which is triggered by all the requests that your site receives that are not for image, video, audio, font, script, or style resources. The edge function uses <a href="https://uaparser.dev/">UAParser.js</a> to parse the user agent string and determine the browser and its version. The data is stored in a Netlify blob with a 7-day window. The browser names and versions are matched to Baseline years and Widely available support status using data from the W3C WebDX Community Group's <a href="https://npmjs.com/baseline-browser-mapping">baseline-browser-mapping</a> module.
         </p>
         <p className="tw-text-sm">
           {processedData.totalRecognisedImpressions} requests were made to your site in the last 7 days from browsers that this extension could categorise. {processedData.totalUnrecognisedImpressions} impressions were from browsers that this extension could not categorise.
