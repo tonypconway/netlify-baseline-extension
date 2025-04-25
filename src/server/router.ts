@@ -45,6 +45,7 @@ export const appRouter = router({
         })
       )
       .mutation(async ({ ctx: { teamId, siteId, client }, input }) => {
+        console.log("setAnalyticsMode", input);
         if (!teamId || !siteId) {
           throw new TRPCError({
             code: "BAD_REQUEST",
@@ -63,6 +64,7 @@ export const appRouter = router({
           });
 
           if (input.analyticsMode) {
+            console.log("Attempting to set analytics mode");
             await client.createOrUpdateVariable({
               accountId: teamId,
               siteId,
@@ -70,6 +72,7 @@ export const appRouter = router({
               value: "1",
             });
           } else {
+            console.log("Attempting to delete analytics mode");
             await client.deleteEnvironmentVariables({
               accountId: teamId,
               siteId,
@@ -78,6 +81,7 @@ export const appRouter = router({
           }
 
           if (input.redeploy) {
+            console.log("Attempting to redeploy site");
             await client.redeploySite({ siteId });
           }
         } catch (e) {
@@ -96,7 +100,18 @@ export const appRouter = router({
     return bbm;
   }),
 
-  debugSettings: procedure.query(() => {
+  debugSettings: procedure.query(async ({ ctx: { teamId, siteId, client } }) => {
+    // if (!teamId || !siteId) {
+    //   throw new TRPCError({
+    //     code: "BAD_REQUEST",
+    //     message: "teamId and siteId are required",
+    //   });
+    // }
+    // const envVariables = await client.getEnvironmentVariables({
+    //   accountId: teamId,
+    //   siteId
+    // });
+    // console.log("envVariables", envVariables);
     const debugUiString: string = Netlify.env.get("BASELINE_EXTENSION_DEBUG_UI") ?? "false";
     const debugUsefakedataString: string = Netlify.env.get("BASELINE_EXTENSION_DEBUG_USEFAKEDATA") ?? "false";
     const debug = {

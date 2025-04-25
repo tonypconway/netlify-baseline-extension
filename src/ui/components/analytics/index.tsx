@@ -290,7 +290,7 @@ export const Analytics = () => {
           {processedData.totalRecognisedImpressions} requests were made to your site in the last 7 days from browsers that this extension could categorise. {processedData.totalUnrecognisedImpressions} impressions were from browsers that this extension could not categorise.
         </p>
       </div>
-      <p>{JSON.stringify(processedData.debugUi)}</p>
+      <p>{JSON.stringify(debugSettings.data)}</p>
       <pre hidden={!processedData.debugUi}>
         {JSON.stringify(processedData, null, 2)};
       </pre>
