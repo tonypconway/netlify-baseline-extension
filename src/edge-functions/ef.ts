@@ -136,8 +136,8 @@ const getBrowserNameAndVersion = (ua: IResult): {
 
   if (debug) console.log("UAParser result", ua.browser.name, ua.browser.version, ua.device.vendor, ua.device.type);
 
-  if (!browserMappings.hasOwnProperty(ua.browser.name)) {
-    throw new Error(`Browser ${ua.browser.name} not recognized`);
+  if (!browserMappings.hasOwnProperty(result.browserName)) {
+    console.log(new Error(`Browser ${ua.browser.name} not recognized`));
     result.version = "unknown";
     return result;
   }
