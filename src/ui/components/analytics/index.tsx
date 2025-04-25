@@ -22,6 +22,8 @@ type ProcessedData = {
   waCompatibleWeights: { [key: string]: number; };
   totalRecognisedImpressions: number;
   totalUnrecognisedImpressions: number;
+  debugUi?: boolean;
+  debugData?: any;
 }
 
 const baselineYearsTest: BaselineYears = {
@@ -44,7 +46,7 @@ const testData: ProcessedData = {
   waCompatibleWeights: {
     true: 66950,
     false: 4120
-  }
+  },
 }
 
 const flattenDays = (data: BrowserData[]): BrowserData => {
@@ -65,7 +67,12 @@ const flattenDays = (data: BrowserData[]): BrowserData => {
   return output;
 }
 
-const processAnalyticsData = (data: BrowserData[], bbm: any, debug: boolean): ProcessedData => {
+const processAnalyticsData = (
+  data: BrowserData[],
+  bbm: any,
+  debugUi: boolean,
+  debugUseFakeData: boolean
+): ProcessedData => {
   let totalUnrecognisedImpressions: number = 0;
   const waCompatibleWeights: { [key: string]: number } = {
     true: 0,
@@ -93,14 +100,26 @@ const processAnalyticsData = (data: BrowserData[], bbm: any, debug: boolean): Pr
 
   const totalRecognisedImpressions = Object.values(baselineYears).reduce((acc, { count }) => acc + count, 0);
 
-  return debug ?
-    testData :
-    {
-      baselineYears: baselineYears,
-      waCompatibleWeights: waCompatibleWeights,
-      totalRecognisedImpressions: totalRecognisedImpressions,
-      totalUnrecognisedImpressions: totalUnrecognisedImpressions,
+  let output: ProcessedData = {
+    baselineYears: baselineYears,
+    waCompatibleWeights: waCompatibleWeights,
+    totalRecognisedImpressions: totalRecognisedImpressions,
+    totalUnrecognisedImpressions: totalUnrecognisedImpressions,
+    debugUi: debugUi,
+  };
+
+  if (debugUseFakeData) {
+    output = Object.assign(output, testData);
+  }
+
+  if (debugUi) {
+    output = {
+      ...output,
+      debugData: data
     }
+  }
+
+  return output;
 }
 
 export const Analytics = () => {
@@ -108,11 +127,12 @@ export const Analytics = () => {
   const siteSettingsQuery = trpc.siteSettings.query.useQuery();
   const analyticsData = trpc.analytics.useQuery();
   const bbm = trpc.bbm.useQuery();
-  const debug = trpc.debugUi.useQuery();
+  const debugSettings = trpc.debugSettings.useQuery();
   const processedData: ProcessedData = processAnalyticsData(
     analyticsData.data ?? [],
     bbm.data ?? {},
-    debug.data ?? false
+    debugSettings.data?.debugUi ?? false,
+    debugSettings.data?.debugUsefakedata ?? false
   );
   const setAnalyticsModeMutation =
     trpc.siteSettings.setAnalyticsMode.useMutation({
@@ -270,6 +290,10 @@ export const Analytics = () => {
           {processedData.totalRecognisedImpressions} requests were made to your site in the last 7 days from browsers that this extension could categorise. {processedData.totalUnrecognisedImpressions} impressions were from browsers that this extension could not categorise.
         </p>
       </div>
+      <p>{JSON.stringify(processedData.debugUi)}</p>
+      <pre hidden={!processedData.debugUi}>
+        {JSON.stringify(processedData, null, 2)};
+      </pre>
 
       {/* BASELINE: some beautiful chart and stuff using the data from analyticsData.data */}
       <Button

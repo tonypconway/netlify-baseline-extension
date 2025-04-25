@@ -96,9 +96,13 @@ export const appRouter = router({
     return bbm;
   }),
 
-  debugUi: procedure.query(() => {
-    const debugString: string = Netlify.env.get("BASELINE_EXTENSION_DEBUG_UI") ?? "false";
-    const debug: boolean = ["true", "TRUE"].includes(debugString) ? true : false;
+  debugSettings: procedure.query(() => {
+    const debugUiString: string = Netlify.env.get("BASELINE_EXTENSION_DEBUG_UI") ?? "false";
+    const debugUsefakedataString: string = Netlify.env.get("BASELINE_EXTENSION_DEBUG_USEFAKEDATA") ?? "false";
+    const debug = {
+      debugUi: ["true", "TRUE"].includes(debugUiString) ? true : false,
+      debugUsefakedata: ["true", "TRUE"].includes(debugUsefakedataString) ? true : false,
+    };
     return debug
   }),
 
