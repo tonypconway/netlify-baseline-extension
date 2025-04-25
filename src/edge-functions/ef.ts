@@ -5,7 +5,7 @@ import type { IResult } from "https://deno.land/x/ua_parser_js@2.0.3/src/main/ua
 import { UAParser } from "https://deno.land/x/ua_parser_js@2.0.3/src/main/ua-parser.mjs";
 
 export default (request: Request) => {
-  if (debug) console.log(request.url);
+  if (debug) console.log("Request URL", request.url);
   const userAgent = request.headers.get("user-agent");
   if (userAgent === null || userAgent === "") {
     return;
@@ -130,14 +130,15 @@ const getBrowserNameAndVersion = (ua: IResult): {
 } => {
 
   const result = {
-    browserName: browserMappings[ua.browser.name]?.shortName ?? ua.browser.name,
+    browserName: "",
     version: "",
   }
 
   if (debug) console.log("UAParser result", ua.browser.name, ua.browser.version, ua.device.vendor, ua.device.type);
 
-  if (!browserMappings.hasOwnProperty(result.browserName)) {
+  if (!browserMappings.hasOwnProperty(ua.browser.name)) {
     console.log(new Error(`Browser ${ua.browser.name} not recognized`));
+    result.browserName = ua.browser.name;
     result.version = "unknown";
     return result;
   }
@@ -193,7 +194,19 @@ async function incrementInBlob(userAgent: string): Promise<void> {
 
   // START: Baseline code
   const ua = UAParser(userAgent) as IResult;
-  const { browserName, version } = getBrowserNameAndVersion(ua);
+  let browserName: string = "";
+  let version: string = "";
+  if (ua.browser.name === undefined) {
+    console.log(new Error(`Browser name is undefined`));
+    browserName = "undefined";
+    version = "unknown";
+  }
+  else {
+    const browserData = getBrowserNameAndVersion(ua);
+    browserName = browserData.browserName;
+    version = browserData.version;
+  }
+
   if (!current.hasOwnProperty(browserName)) {
     current[browserName] = {};
   }
