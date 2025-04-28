@@ -11,6 +11,15 @@ type BrowserData = {
   };
 }
 
+const getEnvVariable = (env: any, id: string) => {
+  const variableData = env.find((variable: any) => variable.key === id);
+  if (variableData) {
+    console.log("Netlify get value", Netlify.env.get(id));
+    const values = variableData.values;
+    return ['true', 'TRUE'].includes(values[0].value) ? true : false
+  } else return false
+}
+
 export const appRouter = router({
   siteSettings: {
     query: procedure.query(async ({ ctx: { teamId, siteId, client } }) => {
@@ -21,7 +30,8 @@ export const appRouter = router({
         });
       }
       const siteConfig = await client.getSiteConfiguration(teamId, siteId);
-      if (!siteConfig) {
+      if (!siteConfig || !siteConfig === null) {
+        console.log("No site config found");
         return;
       }
       const result = SiteSettings.safeParse({
@@ -44,7 +54,11 @@ export const appRouter = router({
           redeploy: z.boolean(),
         })
       )
-      .mutation(async ({ ctx: { teamId, siteId, client }, input }) => {
+      // .mutation(async ({ ctx: { teamId, siteId, client }, input }) => {
+      .mutation(async (opts) => {
+        const { ctx, input } = opts;
+        const { teamId, siteId, client } = ctx;
+
         console.log("setAnalyticsMode", input);
         if (!teamId || !siteId) {
           throw new TRPCError({
@@ -52,6 +66,7 @@ export const appRouter = router({
             message: "teamId and siteId are required",
           });
         }
+        const site = client.getSite(siteId);
         try {
           let currentConfig: any =
             (await client.getSiteConfiguration(teamId, siteId))?.config ??
@@ -70,13 +85,19 @@ export const appRouter = router({
               siteId,
               key: "BASELINE_ANALYTICS",
               value: "1",
+              scopes: ["builds"],
             });
           } else {
             console.log("Attempting to delete analytics mode");
             await client.deleteEnvironmentVariables({
               accountId: teamId,
               siteId,
-              variables: ["BASELINE_ANALYTICS"],
+              variables: [
+                "BASELINE_ANALYTICS",
+                "BASELINE_ANALYTICS_DEBUG_UI",
+                "BASELINE_ANALYTICS_DEBUG_EDGEFUNCTION",
+                "BASELINE_ANALYTICS_DEBUG_USEFAKEDATA"
+              ],
             });
           }
 
@@ -84,12 +105,13 @@ export const appRouter = router({
             console.log("Attempting to redeploy site");
             await client.redeploySite({ siteId });
           }
-        } catch (e) {
+        } catch (e: any) {
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Failed to save team configuration",
             cause: e,
           });
+
         }
       }),
   },
@@ -101,24 +123,23 @@ export const appRouter = router({
   }),
 
   debugSettings: procedure.query(async ({ ctx: { teamId, siteId, client } }) => {
-    // if (!teamId || !siteId) {
-    //   throw new TRPCError({
-    //     code: "BAD_REQUEST",
-    //     message: "teamId and siteId are required",
-    //   });
-    // }
-    // const envVariables = await client.getEnvironmentVariables({
-    //   accountId: teamId,
-    //   siteId
-    // });
-    // console.log("envVariables", envVariables);
-    const debugUiString: string = Netlify.env.get("BASELINE_EXTENSION_DEBUG_UI") ?? "false";
-    const debugUsefakedataString: string = Netlify.env.get("BASELINE_EXTENSION_DEBUG_USEFAKEDATA") ?? "false";
-    const debug = {
-      debugUi: ["true", "TRUE"].includes(debugUiString) ? true : false,
-      debugUsefakedata: ["true", "TRUE"].includes(debugUsefakedataString) ? true : false,
+    if (!teamId || !siteId) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: "teamId and siteId are required",
+      });
+    }
+    const envVariables = await client.getEnvironmentVariables({
+      accountId: teamId,
+      siteId,
+    });
+
+    let debug = {
+      debugUi: getEnvVariable(envVariables, "BASELINE_ANALYTICS_DEBUG_UI"),
+      debugEdgeFunction: getEnvVariable(envVariables, "BASELINE_ANALYTICS_DEBUG_EDGEFUNCTION"),
+      debugUsefakedata: getEnvVariable(envVariables, "BASELINE_ANALYTICS_DEBUG_USEFAKEDATA"),
     };
-    return debug
+    return debug;
   }),
 
   analytics: procedure.query(async ({ ctx: { teamId, siteId, client } }) => {

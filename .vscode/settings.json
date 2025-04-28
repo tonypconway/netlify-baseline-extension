@@ -4,5 +4,11 @@
   "deno.enablePaths": [
     "src/edge-functions"
   ],
-  "deno.unstable": true
+  "deno.unstable": true,
+  "github.copilot.enable": {
+    "*": false,
+    "plaintext": false,
+    "markdown": false,
+    "scminput": false
+  }
 }

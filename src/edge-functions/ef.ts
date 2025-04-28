@@ -125,6 +125,38 @@ const browserMappings: {
   },
 }
 
+const botsAndCrawlers = [
+  "Chrome Headless",
+  "Googlebot",
+  "Bingbot",
+  "BingPreview",
+  "DuckDuckBot",
+  "Baiduspider",
+  "YandexBot",
+  "Sogou Spider",
+  "Exabot",
+  "facebot",
+  "ia_archiver",
+  "Twitterbot",
+  "LinkedInBot",
+  "Slackbot",
+  "WhatsApp",
+  "Discordbot",
+  "Pinterestbot",
+  "TelegramBot",
+  "Googlebot-Image",
+  "Googlebot-Video",
+  "Googlebot-News",
+  "Googlebot-Mobile",
+  "Googlebot-AdsBot",
+  "AdsBot-Google",
+  "AdsBot-Google-Mobile",
+  "AdsBot-Google-Mobile-Ads",
+  "AdsBot-Google-Mobile-Ads-Image",
+  "AdsBot-Google-Mobile-Ads-Video",
+  "AdsBot-Google-Mobile-Ads-Video",
+];
+
 const getBrowserNameAndVersion = (ua: IResult): {
   browserName: string;
   version: string;

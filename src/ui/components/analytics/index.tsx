@@ -90,7 +90,7 @@ const processAnalyticsData = (
     Object.entries(versions).forEach(([version, { count }]) => {
       if (bbm[browserName] && bbm[browserName][version]) {
         const versionYear: string = bbm[browserName][version]?.year;
-        const waCompatible: boolean = bbm[browserName][version]?.waCompatible;
+        const waCompatible: boolean = bbm[browserName][version]?.wa_compatible;
         baselineYears[versionYear].count += count;
         waCompatibleWeights[waCompatible.toString()] += count;
       }
@@ -128,12 +128,6 @@ export const Analytics = () => {
   const analyticsData = trpc.analytics.useQuery();
   const bbm = trpc.bbm.useQuery();
   const debugSettings = trpc.debugSettings.useQuery();
-  const processedData: ProcessedData = processAnalyticsData(
-    analyticsData.data ?? [],
-    bbm.data ?? {},
-    debugSettings.data?.debugUi ?? false,
-    debugSettings.data?.debugUsefakedata ?? false
-  );
   const setAnalyticsModeMutation =
     trpc.siteSettings.setAnalyticsMode.useMutation({
       onSuccess: async () => {
@@ -141,6 +135,7 @@ export const Analytics = () => {
       },
     });
   const [showAreYouSure, setShowAreYouSure] = React.useState(false);
+  const [showDebugOptions, setShowDebugOptions] = React.useState(false);
 
   if (
     siteSettingsQuery.isLoading ||
@@ -186,6 +181,13 @@ export const Analytics = () => {
       </Card>
     );
   }
+
+  const processedData: ProcessedData = processAnalyticsData(
+    analyticsData.data ?? [],
+    bbm.data ?? {},
+    debugSettings.data?.debugUi ?? false,
+    debugSettings.data?.debugUsefakedata ?? false
+  );
 
   return (
     <Card>
@@ -326,6 +328,15 @@ export const Analytics = () => {
             </div>
           </div>
         )
+      }
+      <Button
+        variant="standard"
+        className="tw-mt-4"
+        onClick={() => setShowDebugOptions((prev) => !prev)}>Show debug options</Button>
+      {showDebugOptions &&
+        <div>
+          debug options
+        </div>
       }
     </Card >
   );
