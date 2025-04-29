@@ -71,7 +71,7 @@ const processAnalyticsData = (
   data: BrowserData[],
   bbm: any,
   debugUi: boolean,
-  debugUseFakeData: boolean
+  useFakeData: boolean
 ): ProcessedData => {
   let totalUnrecognisedImpressions: number = 0;
   const waCompatibleWeights: { [key: string]: number } = {
@@ -108,7 +108,7 @@ const processAnalyticsData = (
     debugUi: debugUi,
   };
 
-  if (debugUseFakeData) {
+  if (useFakeData) {
     output = Object.assign(output, testData);
   }
 
@@ -127,11 +127,17 @@ export const Analytics = () => {
   const siteSettingsQuery = trpc.siteSettings.query.useQuery();
   const analyticsData = trpc.analytics.useQuery();
   const bbm = trpc.bbm.useQuery();
-  const debugSettings = trpc.debugSettings.useQuery();
+  const debugSettings = trpc.debugSettings.query.useQuery();
   const setAnalyticsModeMutation =
     trpc.siteSettings.setAnalyticsMode.useMutation({
       onSuccess: async () => {
         await trpcUtils.siteSettings.query.invalidate();
+      },
+    });
+  const setDebugOptionsMutation =
+    trpc.debugSettings.setDebugSettings.useMutation({
+      onSuccess: async () => {
+        await trpcUtils.debugSettings.query.invalidate();
       },
     });
   const [showAreYouSure, setShowAreYouSure] = React.useState(false);
@@ -186,7 +192,7 @@ export const Analytics = () => {
     analyticsData.data ?? [],
     bbm.data ?? {},
     debugSettings.data?.debugUi ?? false,
-    debugSettings.data?.debugUsefakedata ?? false
+    debugSettings.data?.useFakeData ?? false
   );
 
   return (
@@ -216,16 +222,15 @@ export const Analytics = () => {
             all the features that were Baseline Newly available at the end of
             each calendar year back to 2016.
           </p>
-          <div style={{ width: '200px', marginTop: '1em' }}>
+          <table style={{ width: '200px', marginTop: '1em' }}>
             {
               Object.entries(processedData.baselineYears)
                 // Only show a year if it represents greater than 0.05% of overall impressions
                 .filter(([_, { count }]) => count > (processedData.totalRecognisedImpressions * 0.0005))
-                .map(([year, { count }], index, array) => (
-                  <div
+                .map(([year], index, array) => (
+                  <tr
                     key={year}
                     style={{
-                      height: `${(count / processedData.totalRecognisedImpressions) * 500}px`,
                       backgroundColor: `rgba(51, 103, 214, ${(array.length - index) / array.length})`, // Baseline Newly blue with decreasing transparency
                       minHeight: '2.1em',
                       padding: '0.2em 0.5em',
@@ -237,17 +242,19 @@ export const Analytics = () => {
                       gap: '0.2em',
                     }}
                   >
-                    <span>Baseline {year} </span>
-                    <span>({Math.round(
+                    <tr>Baseline {year} </tr>
+                    <tr
+                      style={{ textAlign: 'right' }}
+                    >({Math.round(
                       array
                         .slice(index)
                         .reduce((acc, [_, { count }]) => acc + count, 0) /
                       processedData.totalRecognisedImpressions *
                       100
-                    )}%)</span>
-                  </div>
+                    )}%)</tr>
+                  </tr>
                 ))}
-          </div>
+          </table>
         </div>
         <div>
           <div>
@@ -292,10 +299,6 @@ export const Analytics = () => {
           {processedData.totalRecognisedImpressions} requests were made to your site in the last 7 days from browsers that this extension could categorise. {processedData.totalUnrecognisedImpressions} impressions were from browsers that this extension could not categorise.
         </p>
       </div>
-      <p>{JSON.stringify(debugSettings.data)}</p>
-      <pre hidden={!processedData.debugUi}>
-        {JSON.stringify(processedData, null, 2)};
-      </pre>
 
       {/* BASELINE: some beautiful chart and stuff using the data from analyticsData.data */}
       <Button
@@ -332,10 +335,31 @@ export const Analytics = () => {
       <Button
         variant="standard"
         className="tw-mt-4"
-        onClick={() => setShowDebugOptions((prev) => !prev)}>Show debug options</Button>
+        onClick={() => setShowDebugOptions((prev) => !prev)}>{!showDebugOptions ? 'Show' : 'Hide'} debug options</Button>
       {showDebugOptions &&
         <div>
-          debug options
+          <p>
+            <Button
+              onClick={async () => {
+                await setDebugOptionsMutation.mutateAsync({
+                  debugUi: !debugSettings.data?.debugUi
+                });
+              }}>{debugSettings.data?.debugUi ? 'Disable' : 'Enable'}</Button>
+            Display debug data.
+          </p>
+          <p>
+            <Button
+              onClick={async () => {
+                await setDebugOptionsMutation.mutateAsync({
+                  logEdgeFunction: !debugSettings.data?.logEdgeFunction
+                });
+              }}>{debugSettings.data?.logEdgeFunction ? 'Disable' : 'Enable'}</Button>
+            Edge function logging.
+          </p>
+          <p>{JSON.stringify(debugSettings.data)}</p>
+          <pre hidden={!processedData.debugUi}>
+            {JSON.stringify(processedData, null, 2)};
+          </pre>
         </div>
       }
     </Card >

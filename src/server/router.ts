@@ -14,7 +14,6 @@ type BrowserData = {
 const getEnvVariable = (env: any, id: string) => {
   const variableData = env.find((variable: any) => variable.key === id);
   if (variableData) {
-    console.log("Netlify get value", Netlify.env.get(id));
     const values = variableData.values;
     return ['true', 'TRUE'].includes(values[0].value) ? true : false
   } else return false
@@ -66,12 +65,13 @@ export const appRouter = router({
             message: "teamId and siteId are required",
           });
         }
-        const site = client.getSite(siteId);
         try {
           let currentConfig: any =
             (await client.getSiteConfiguration(teamId, siteId))?.config ??
             ({
               analyticsMode: false,
+              debugUi: false,
+              logEdgeFunction: false,
             } satisfies SiteSettings);
           await client.upsertSiteConfiguration(teamId, siteId, {
             ...currentConfig,
@@ -122,25 +122,75 @@ export const appRouter = router({
     return bbm;
   }),
 
-  debugSettings: procedure.query(async ({ ctx: { teamId, siteId, client } }) => {
-    if (!teamId || !siteId) {
-      throw new TRPCError({
-        code: "BAD_REQUEST",
-        message: "teamId and siteId are required",
+  debugSettings: {
+    query: procedure.query(async ({ ctx: { teamId, siteId, client } }) => {
+      if (!teamId || !siteId) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "teamId and siteId are required",
+        });
+      }
+      const envVariables = await client.getEnvironmentVariables({
+        accountId: teamId,
+        siteId,
       });
-    }
-    const envVariables = await client.getEnvironmentVariables({
-      accountId: teamId,
-      siteId,
-    });
 
-    let debug = {
-      debugUi: getEnvVariable(envVariables, "BASELINE_ANALYTICS_DEBUG_UI"),
-      debugEdgeFunction: getEnvVariable(envVariables, "BASELINE_ANALYTICS_DEBUG_EDGEFUNCTION"),
-      debugUsefakedata: getEnvVariable(envVariables, "BASELINE_ANALYTICS_DEBUG_USEFAKEDATA"),
-    };
-    return debug;
-  }),
+      let currentConfig: any =
+        (await client.getSiteConfiguration(teamId, siteId))?.config ??
+        ({
+          debugUi: false,
+          logEdgeFunction: false,
+        } satisfies SiteSettings);
+
+      let debug = {
+        debugUi: currentConfig.debugUi ?? false,
+        logEdgeFunction: currentConfig.logEdgeFunction ?? false,
+        useFakeData: getEnvVariable(envVariables, "BASELINE_ANALYTICS_DEBUG_USEFAKEDATA"),
+      };
+      return debug;
+    }),
+
+    setDebugSettings: procedure
+      .input(
+        z.object({
+          debugUi: z.boolean().optional(),
+          logEdgeFunction: z.boolean().optional(),
+        })
+      )
+      // .mutation(async ({ ctx: { teamId, siteId, client }, input }) => {
+      .mutation(async (opts) => {
+        const { ctx, input } = opts;
+        const { teamId, siteId, client } = ctx;
+
+        console.log("setAnalyticsMode", input);
+        if (!teamId || !siteId) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "teamId and siteId are required",
+          });
+        }
+        try {
+          let currentConfig: any =
+            (await client.getSiteConfiguration(teamId, siteId))?.config ??
+            ({
+              debugUi: false,
+              logEdgeFunction: false,
+            } satisfies SiteSettings);
+          await client.upsertSiteConfiguration(teamId, siteId, {
+            ...currentConfig,
+            ...input,
+          });
+        }
+        catch (e: any) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Failed to save team configuration",
+            cause: e,
+          });
+
+        }
+      }),
+  },
 
   analytics: procedure.query(async ({ ctx: { teamId, siteId, client } }) => {
     if (!teamId || !siteId) {
