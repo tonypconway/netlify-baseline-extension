@@ -7,6 +7,31 @@ import {
 import { trpc } from "../../trpc";
 import * as React from "react";
 
+const tableStyles = {
+  container: { maxWidth: '48rem' },
+  table: {
+    width: "100%",
+    marginTop: '1.5rem',
+    tableLayout: 'fixed' as const,
+    borderCollapse: 'collapse' as const,
+    color: 'white',
+  },
+  header: {
+
+  },
+  row: {
+
+  },
+  cell: {
+    padding: '0.5em 1em'
+  },
+  newlyCell: {
+    backgroundRepeat: 'no-repeat',
+    backgroundSize: '10000% 100%',
+    backgroundImage: `linear-gradient(to left, rgb(51 103 214) 0%, rgb(156, 113, 28) 10%, rgb(100, 4, 4))`,
+  }
+}
+
 type BrowserData = {
   [browserName: string]: {
     [version: string]: {
@@ -214,81 +239,88 @@ export const Analytics = () => {
         .
       </p>
       <p className="tw-text-sm">Numbers are approximate.</p>
-      <div style={{ display: 'flex', gap: '2em' }}>
-        <div>
-          <h3>Baseline yearly feature set support</h3>
-          <p>
-            This table shows the percentage of your users that can support
-            all the features that were Baseline Newly available at the end of
-            each calendar year back to 2016.
-          </p>
-          <table style={{ width: '200px', marginTop: '1em' }}>
-            {
-              Object.entries(processedData.baselineYears)
-                // Only show a year if it represents greater than 0.05% of overall impressions
-                .filter(([_, { count }]) => count > (processedData.totalRecognisedImpressions * 0.0005))
-                .map(([year], index, array) => (
-                  <tr
-                    key={year}
-                    style={{
-                      backgroundColor: `rgba(51, 103, 214, ${(array.length - index) / array.length})`, // Baseline Newly blue with decreasing transparency
-                      minHeight: '2.1em',
-                      padding: '0.2em 0.5em',
-                      borderBottom: `${index != array.length - 1 ? '1px solid darkgray' : 'none'}`,
-                      color: 'white',
-                      display: 'flex',
-                      alignItems: 'top',
-                      justifyContent: 'left',
-                      gap: '0.2em',
-                    }}
-                  >
-                    <tr>Baseline {year} </tr>
+
+      <div>
+        <h3>Baseline yearly feature set support</h3>
+        <p>
+          This table shows the percentage of your users that can support
+          all the features that were Baseline Newly available at the end of
+          each calendar year back to 2016.
+        </p>
+        <div style={tableStyles.container}>
+          <table style={tableStyles.table}>
+            <tbody>
+              <tr>
+                <th>Baseline</th>
+                <th>Supported users</th>
+              </tr>
+              {
+                Object.entries(processedData.baselineYears)
+                  // Only show a year if it represents greater than 0.05% of overall impressions
+                  .filter(([_, { count }]) => count > (processedData.totalRecognisedImpressions * 0.0005))
+                  .map(([year], index, array) => (
                     <tr
-                      style={{ textAlign: 'right' }}
-                    >({Math.round(
-                      array
-                        .slice(index)
-                        .reduce((acc, [_, { count }]) => acc + count, 0) /
-                      processedData.totalRecognisedImpressions *
-                      100
-                    )}%)</tr>
-                  </tr>
-                ))}
+                      key={year}>
+                      <td style={tableStyles.cell}>Baseline {year} </td>
+                      <td
+                        style={{
+                          ...tableStyles.cell,
+                          ...tableStyles.newlyCell,
+                          textAlign: 'right',
+                          backgroundPositionX: `${Math.round(
+                            array
+                              .slice(index)
+                              .reduce((acc, [_, { count }]) => acc + count, 0) /
+                            processedData.totalRecognisedImpressions *
+                            100)}%`,
+                        }}
+                      >({Math.round(
+                        array
+                          .slice(index)
+                          .reduce((acc, [_, { count }]) => acc + count, 0) /
+                        processedData.totalRecognisedImpressions *
+                        100
+                      )}%)</td>
+                    </tr>
+                  ))}
+              <tr></tr>
+            </tbody>
           </table>
         </div>
+      </div>
+      <div>
         <div>
-          <div>
-            <h3>Baseline Widely available support</h3>
-            <p>
-              This table shows the percentage of impressions you delivered to a browser that supports the Baseline Widely available feature set.
-            </p>
-            <div style={{ width: '200px', height: '500px', marginTop: '1em' }}>
-              <div style={{
-                backgroundColor: 'rgba(9, 153, 73, 1)',
-                height: `${processedData.waCompatibleWeights.true / processedData.totalRecognisedImpressions * 100}%`,
-                minHeight: '3.5em',
-                padding: '0.2em 0.5em',
-                color: 'white',
-                display: 'flex',
-              }}
-              >
-                <span>Widely available supported ({Math.round(processedData.waCompatibleWeights.true / processedData.totalRecognisedImpressions * 100)}%)</span>
-              </div>
-              <div style={{
-                backgroundColor: 'darkgrey',
-                height: `${processedData.waCompatibleWeights.false / processedData.totalRecognisedImpressions * 100}%`,
-                minHeight: '3.5em',
-                padding: '0.2em 0.5em',
-                color: 'white',
-                display: 'flex',
-              }}>
-                <span>Widely available unsupported ({Math.round(processedData.waCompatibleWeights.false / (processedData.totalRecognisedImpressions) * 100)}%)</span>
-              </div>
+          <h3>Baseline Widely available support</h3>
+          <p>
+            This table shows the percentage of impressions you delivered to a browser that supports the Baseline Widely available feature set.
+          </p>
+          <div style={{ width: '200px', height: '500px', marginTop: '1em' }}>
+            <div style={{
+              backgroundColor: 'rgba(9, 153, 73, 1)',
+              height: `${processedData.waCompatibleWeights.true / processedData.totalRecognisedImpressions * 100}%`,
+              minHeight: '3.5em',
+              padding: '0.2em 0.5em',
+              color: 'white',
+              display: 'flex',
+            }}
+            >
+              <span>Widely available supported ({Math.round(processedData.waCompatibleWeights.true / processedData.totalRecognisedImpressions * 100)}%)</span>
+            </div>
+            <div style={{
+              backgroundColor: 'darkgrey',
+              height: `${processedData.waCompatibleWeights.false / processedData.totalRecognisedImpressions * 100}%`,
+              minHeight: '3.5em',
+              padding: '0.2em 0.5em',
+              color: 'white',
+              display: 'flex',
+            }}>
+              <span>Widely available unsupported ({Math.round(processedData.waCompatibleWeights.false / (processedData.totalRecognisedImpressions) * 100)}%)</span>
             </div>
           </div>
         </div>
-
       </div>
+
+
 
       <div>
         <h3>Notes on data used for these tables</h3>
