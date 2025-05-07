@@ -157,7 +157,7 @@ const botsAndCrawlers = [
   "AdsBot-Google-Mobile-Ads-Video",
 ];
 
-const getBrowserNameAndVersion = (ua: IResult): {
+const getBrowserNameAndVersion = (ua: IResult, userAgent: string): {
   browserName: string;
   version: string;
 } => {
@@ -170,7 +170,7 @@ const getBrowserNameAndVersion = (ua: IResult): {
   if (debug) console.log("UAParser result", ua.browser.name, ua.browser.version, ua.device.vendor, ua.device.type);
 
   if (!browserMappings.hasOwnProperty(ua.browser.name)) {
-    console.log(new Error(`Browser ${ua.browser.name} not recognized.  Full UserAgent is: \n${ua.getUa()}`));
+    console.log(new Error(`Browser ${ua.browser.name} not recognized.  Full UserAgent is: \n${userAgent}`));
     result.browserName = ua.browser.name;
     result.version = "unknown";
     return result;
@@ -235,7 +235,7 @@ async function incrementInBlob(userAgent: string): Promise<void> {
     version = "unknown";
   }
   else {
-    const browserData = getBrowserNameAndVersion(ua);
+    const browserData = getBrowserNameAndVersion(ua, userAgent);
     browserName = browserData.browserName;
     version = browserData.version;
   }
