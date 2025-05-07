@@ -212,8 +212,10 @@ export const appRouter = router({
         return (
           await Promise.all(
             blobs.map(
-              async ({ key }) =>
-                ((await store.get(key, { type: "json" })) ?? {}) as BrowserData
+              async ({ key }) => {
+                console.log(key);
+                return ((await store.get(key, { type: "json" })) ?? {}) as BrowserData
+              }
             )
           )
         ).reduce((acc: BrowserData, data: BrowserData) => {
