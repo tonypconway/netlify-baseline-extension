@@ -230,7 +230,7 @@ async function incrementInBlob(userAgent: string): Promise<void> {
   let browserName: string = "";
   let version: string = "";
   if (ua.browser.name === undefined) {
-    console.log(new Error(`Browser name is undefined`));
+    console.log(new Error(`Browser name is undefined.\nUserAgent is: ${userAgent}`));
     browserName = "undefined";
     version = "unknown";
   }
