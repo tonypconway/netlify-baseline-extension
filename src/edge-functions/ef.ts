@@ -170,7 +170,7 @@ const getBrowserNameAndVersion = (ua: IResult): {
   if (debug) console.log("UAParser result", ua.browser.name, ua.browser.version, ua.device.vendor, ua.device.type);
 
   if (!browserMappings.hasOwnProperty(ua.browser.name)) {
-    console.log(new Error(`Browser ${ua.browser.name} not recognized`));
+    console.log(new Error(`Browser ${ua.browser.name} not recognized.  Full UserAgent is: \n${ua.getUa()}`));
     result.browserName = ua.browser.name;
     result.version = "unknown";
     return result;
@@ -184,7 +184,7 @@ const getBrowserNameAndVersion = (ua: IResult): {
     // is being used.
     const versionParts = ua.os.version.split(".");
     result.version =
-      versionParts[1] == 0
+      !versionParts[1] || versionParts[1] == "0"
         ? `${versionParts[0]}`
         : `${versionParts[0]}.${versionParts[1]}`;
     result.browserName = "safari_ios";
