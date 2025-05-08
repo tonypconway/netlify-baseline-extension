@@ -126,7 +126,7 @@ const browserMappings: {
 }
 
 const botsAndCrawlers = [
-  "Chrome Headless",
+  "HeadlessChrome",
   "Googlebot",
   "Bingbot",
   "BingPreview",
