@@ -198,7 +198,7 @@ export const Analytics = () => {
   const deleteAllDataMutation =
     trpc.debugSettings.deleteAllData.useMutation({
       onSuccess: async () => {
-        await trpcUtils.debugSettings.query.invalidate();
+        await trpcUtils.analytics.invalidate();
       },
     });
   const [showAreYouSure, setShowAreYouSure] = React.useState(false);
