@@ -189,9 +189,25 @@ export const appRouter = router({
         }
       }),
 
-    deleteAllData: procedure.mutation(async ({ ctx: { siteId } }) => {
-
-    })
+    deleteAllData: procedure
+      .input(z.object({
+        deleteAllData: z.boolean().optional(),
+      }))
+      .mutation(async (opts) => {
+        const { ctx, input } = opts;
+        const { teamId, siteId, client } = ctx;
+        if (!siteId) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "siteId is required",
+          });
+        }
+        const store = client.getBlobStore(siteId, "netlify-baseline");
+        const datesBlobs = await store.list();
+        datesBlobs.blobs.forEach(({ key }) => {
+          store.delete(key);
+        });
+      })
   },
 
   analytics: procedure.query(async ({ ctx: { teamId, siteId, client } }) => {

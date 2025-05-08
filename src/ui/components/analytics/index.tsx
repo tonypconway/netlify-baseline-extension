@@ -195,7 +195,14 @@ export const Analytics = () => {
         await trpcUtils.debugSettings.query.invalidate();
       },
     });
+  const deleteAllDataMutation =
+    trpc.debugSettings.deleteAllData.useMutation({
+      onSuccess: async () => {
+        await trpcUtils.debugSettings.query.invalidate();
+      },
+    });
   const [showAreYouSure, setShowAreYouSure] = React.useState(false);
+  const [showAreYouSureDelete, setShowAreYouSureDelete] = React.useState(false);
   const [showDebugOptions, setShowDebugOptions] = React.useState(false);
 
   if (
@@ -374,32 +381,60 @@ export const Analytics = () => {
           </div>
         )
       }
-      <Button
-        variant="standard"
-        className="tw-mt-4"
-        onClick={() => setShowDebugOptions((prev) => !prev)}>{!showDebugOptions ? 'Show' : 'Hide'} debug options</Button>
+      <p>
+        <Button
+          variant="standard"
+          className="tw-mt-4 tw-mb-4"
+          onClick={() => setShowDebugOptions((prev) => !prev)}>{!showDebugOptions ? 'Show' : 'Hide'} debug options</Button>
+      </p>
       {
         showDebugOptions &&
         <div>
-          <p>
-            <Button
-              onClick={async () => {
-                await setDebugOptionsMutation.mutateAsync({
-                  debugUi: !debugSettings.data?.debugUi
-                });
-              }}>{debugSettings.data?.debugUi ? 'Disable' : 'Enable'}</Button>
-            Display debug data.
-          </p>
-          <p>
-            <Button
-              onClick={async () => {
-                await setDebugOptionsMutation.mutateAsync({
-                  logEdgeFunction: !debugSettings.data?.logEdgeFunction
-                });
-              }}>{debugSettings.data?.logEdgeFunction ? 'Disable' : 'Enable'}</Button>
-            Edge function logging.
-          </p>
-          <p>{JSON.stringify(debugSettings.data)}</p>
+
+          <Button
+            className="tw-mr-4 tw-mb-4 sm:tw-mb-0"
+            onClick={async () => {
+              await setDebugOptionsMutation.mutateAsync({
+                debugUi: !debugSettings.data?.debugUi
+              });
+            }}>{debugSettings.data?.debugUi ? 'Hide' : 'Show'} debug data</Button>
+
+          <Button
+            className="tw-mr-4 tw-mb-4 sm:tw-mb-0"
+            onClick={async () => {
+              await setDebugOptionsMutation.mutateAsync({
+                logEdgeFunction: !debugSettings.data?.logEdgeFunction
+              });
+            }}>{debugSettings.data?.logEdgeFunction ? 'Disable' : 'Enable'} Edge function logging</Button>
+
+          <Button
+            className="tw-mr-4 tw-mb-4 sm:tw-mb-0"
+            onClick={() => setShowAreYouSureDelete((prev) => !prev)}
+          >Delete all captured data permanently</Button>
+          {
+            showAreYouSureDelete && (
+              <div className="tw-mt-4 tw-ml-4">
+                <h3>Are you sure you want to delete all the data you have captured with this extension?</h3>
+                <p>This action cannot be reversed.</p>
+                <div className="tw-mt-4 tw-flex tw-gap-4">
+                  <Button level="secondary" onClick={() => setShowAreYouSureDelete(false)}>
+                    Cancel
+                  </Button>
+                  <Button
+                    variant="danger"
+                    onClick={async () => {
+                      await deleteAllDataMutation.mutateAsync({
+                        deleteAllData: true
+                      })
+                    }}
+                  >
+                    Confirm
+                  </Button>
+                </div>
+              </div>
+            )
+          }
+
           <pre hidden={!processedData.debugUi}>
             {JSON.stringify(processedData, null, 2)};
           </pre>
