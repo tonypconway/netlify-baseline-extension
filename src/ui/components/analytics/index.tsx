@@ -130,9 +130,9 @@ const processAnalyticsData = (
     true: 0,
     false: 0
   };
-  let nextYear = new Date().getFullYear() + 1;
+  let thisYear = new Date().getFullYear();
 
-  let baselineYears = [...Array(nextYear).keys()].slice(2016).reduce((acc, year) => {
+  let baselineYears = [...Array(thisYear).keys()].slice(2016).reduce((acc, year) => {
     return { ...acc, [year.toString()]: { year: year, count: 0 } }
   }, {} as { [key: string]: { year: number, count: number } });
 
