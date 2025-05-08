@@ -159,6 +159,8 @@ const botsAndCrawlers = [
   "openai.com/bot",
   "ChatGPT",
   "Statping-ng",
+  "DotBot",
+  "dotbot",
 ];
 
 const getBrowserNameAndVersion = (ua: IResult, userAgent: string): {
