@@ -94,8 +94,6 @@ export const appRouter = router({
               siteId,
               variables: [
                 "BASELINE_ANALYTICS",
-                "BASELINE_ANALYTICS_DEBUG_UI",
-                "BASELINE_ANALYTICS_DEBUG_EDGEFUNCTION",
                 "BASELINE_ANALYTICS_DEBUG_USEFAKEDATA"
               ],
             });
