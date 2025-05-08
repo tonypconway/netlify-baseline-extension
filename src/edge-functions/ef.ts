@@ -214,7 +214,7 @@ const getBrowserNameAndVersion = (ua: IResult, userAgent: string): {
 async function incrementInBlob(userAgent: string): Promise<void> {
 
   if (botsAndCrawlers.some((bot) => userAgent.includes(bot))) {
-    console.log(`Crawler detected, will not count.\nUserAgent is: ${userAgent}`);
+    if (debug) console.log(`Crawler detected, will not count.\nUserAgent is: ${userAgent}`);
     return
   }
 
