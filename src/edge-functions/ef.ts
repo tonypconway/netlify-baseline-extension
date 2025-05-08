@@ -221,7 +221,11 @@ async function incrementInBlob(userAgent: string): Promise<void> {
 
   const ua = UAParser(userAgent) as IResult;
 
-  if (ua.type == "crawler" || botsAndCrawlers.some((bot) => userAgent.includes(bot))) {
+  if (
+    ua.type == "crawler" ||
+    botsAndCrawlers.some(bot => userAgent.includes(bot)) ||
+    botsAndCrawlers.some(bot => ua.name === bot)
+  ) {
     if (debug) console.log(`Crawler detected, will not count.\nUserAgent is: ${userAgent}`);
     return
   }

@@ -345,11 +345,12 @@ export const Analytics = () => {
           This extension uses a Netlify edge function which is triggered by all the requests that your site receives that are not for image, video, audio, font, script, or style resources. The edge function uses <a href="https://uaparser.dev/">UAParser.js</a> to parse the user agent string and determine the browser and its version. The data is stored in a Netlify blob with a 7-day window. The browser names and versions are matched to Baseline years and Widely available support status using data from the W3C WebDX Community Group's <a href="https://npmjs.com/baseline-browser-mapping">baseline-browser-mapping</a> module.
         </p>
         <p className="tw-text-sm">
-          {processedData.totalRecognisedImpressions} requests were made to your site in the last 7 days from browsers that this extension could categorise. {processedData.totalUnrecognisedImpressions} impressions were from browsers that this extension could not categorise.
+          {processedData.totalRecognisedImpressions} requests were made to your site in the last 7 days from browsers that this extension could categorise. {processedData.totalUnrecognisedImpressions} impressions were from browsers that this extension could not categorise.</p>
+        <p>
+          Requests from crawlers and bots should be filtered out.  If you are seeing impressions in your debug data from a crawler, please make a pull request to add it to the <a href="https://github.com/tonypconway/netlify-baseline-extension/blob/6881588be412970abf96143519391025ebf4e339/src/edge-functions/ef.ts#L128-L164">filter list</a> in the extension code.  Be aware that crawlers and unidentifiable browsers are not used to calculate the figures in the charts above.
         </p>
       </div>
 
-      {/* BASELINE: some beautiful chart and stuff using the data from analyticsData.data */}
       <Button
         variant="danger"
         className="tw-mt-4"
