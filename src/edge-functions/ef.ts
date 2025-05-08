@@ -155,7 +155,9 @@ const botsAndCrawlers = [
   "AdsBot-Google-Mobile-Ads-Image",
   "AdsBot-Google-Mobile-Ads-Video",
   "AdsBot-Google-Mobile-Ads-Video",
-  "ImagesiftBot"
+  "ImagesiftBot",
+  "openai.com/bot",
+  "ChatGPT",
 ];
 
 const getBrowserNameAndVersion = (ua: IResult, userAgent: string): {
