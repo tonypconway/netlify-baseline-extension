@@ -155,6 +155,7 @@ const botsAndCrawlers = [
   "AdsBot-Google-Mobile-Ads-Image",
   "AdsBot-Google-Mobile-Ads-Video",
   "AdsBot-Google-Mobile-Ads-Video",
+  "ImagesiftBot"
 ];
 
 const getBrowserNameAndVersion = (ua: IResult, userAgent: string): {
@@ -213,7 +214,9 @@ const getBrowserNameAndVersion = (ua: IResult, userAgent: string): {
 
 async function incrementInBlob(userAgent: string): Promise<void> {
 
-  if (botsAndCrawlers.some((bot) => userAgent.includes(bot))) {
+  const ua = UAParser(userAgent) as IResult;
+
+  if (ua.type == "crawler" || botsAndCrawlers.some((bot) => userAgent.includes(bot))) {
     if (debug) console.log(`Crawler detected, will not count.\nUserAgent is: ${userAgent}`);
     return
   }
@@ -231,8 +234,6 @@ async function incrementInBlob(userAgent: string): Promise<void> {
   const key = `counts/${today}/${bucket}`;
   const current = (await store.get(key, { type: "json" })) ?? {};
 
-  // START: Baseline code
-  const ua = UAParser(userAgent) as IResult;
   let browserName: string = "";
   let version: string = "";
   if (ua.browser.name === undefined) {

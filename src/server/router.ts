@@ -188,6 +188,10 @@ export const appRouter = router({
 
         }
       }),
+
+    deleteAllData: procedure.mutation(async ({ ctx: { siteId } }) => {
+
+    })
   },
 
   analytics: procedure.query(async ({ ctx: { teamId, siteId, client } }) => {
