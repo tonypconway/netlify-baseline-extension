@@ -219,7 +219,7 @@ async function incrementInBlob(userAgent: string): Promise<void> {
 
   // increment the count for today
   const today = new Date().toISOString().split("T")[0];
-  const bucket = Math.floor(Math.random() * 100)
+  const bucket = Math.floor(Math.random() * 25)
     .toString()
     .padStart(4, "0");
   const key = `counts/${today}/${bucket}`;
