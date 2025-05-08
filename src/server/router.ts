@@ -211,12 +211,10 @@ export const appRouter = router({
       }).map(async (date) => {
         const prefix = `counts/${date}/`;
         const { blobs } = await store.list({ prefix });
-        console.log(blobs);
         return (
           await Promise.all(
             blobs.map(
               async ({ key }) => {
-                console.log(key);
                 return ((await store.get(key, { type: "json" })) ?? {}) as BrowserData
               }
             )
