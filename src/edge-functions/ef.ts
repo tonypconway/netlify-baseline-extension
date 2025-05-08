@@ -161,6 +161,7 @@ const botsAndCrawlers = [
   "Statping-ng",
   "DotBot",
   "dotbot",
+  "YisouSpider"
 ];
 
 const getBrowserNameAndVersion = (ua: IResult, userAgent: string): {
