@@ -71,7 +71,6 @@ export const appRouter = router({
             ({
               analyticsMode: false,
               debugUi: false,
-              logEdgeFunction: false,
             } satisfies SiteSettings);
           await client.upsertSiteConfiguration(teamId, siteId, {
             ...currentConfig,
@@ -87,6 +86,13 @@ export const appRouter = router({
               value: "1",
               scopes: ["builds"],
             });
+            await client.createOrUpdateVariable({
+              accountId: teamId,
+              siteId,
+              key: "BASELINE_ANALYTICS_DEBUG_EDGE_FUNCTION",
+              value: "false",
+              scopes: ["builds"],
+            });
           } else {
             console.log("Attempting to delete analytics mode");
             await client.deleteEnvironmentVariables({
@@ -94,7 +100,8 @@ export const appRouter = router({
               siteId,
               variables: [
                 "BASELINE_ANALYTICS",
-                "BASELINE_ANALYTICS_DEBUG_USEFAKEDATA"
+                "BASELINE_ANALYTICS_DEBUG_USEFAKEDATA",
+                "BASELINE_ANALYTICS_DEBUG_EDGE_FUNCTION"
               ],
             });
           }
@@ -137,12 +144,11 @@ export const appRouter = router({
         (await client.getSiteConfiguration(teamId, siteId))?.config ??
         ({
           debugUi: false,
-          logEdgeFunction: false,
         } satisfies SiteSettings);
 
       let debug = {
         debugUi: currentConfig.debugUi ?? false,
-        logEdgeFunction: currentConfig.logEdgeFunction ?? false,
+        logEdgeFunction: getEnvVariable(envVariables, "BASELINE_ANALYTICS_DEBUG_EDGE_FUNCTION"),
         useFakeData: getEnvVariable(envVariables, "BASELINE_ANALYTICS_DEBUG_USEFAKEDATA"),
       };
       return debug;
@@ -172,11 +178,17 @@ export const appRouter = router({
             (await client.getSiteConfiguration(teamId, siteId))?.config ??
             ({
               debugUi: false,
-              logEdgeFunction: false,
             } satisfies SiteSettings);
           await client.upsertSiteConfiguration(teamId, siteId, {
             ...currentConfig,
             ...input,
+          });
+          await client.createOrUpdateVariable({
+            accountId: teamId,
+            siteId,
+            key: "BASELINE_ANALYTICS_DEBUG_EDGE_FUNCTION",
+            value: `${input.logEdgeFunction}`,
+            scopes: ["builds"],
           });
         }
         catch (e: any) {

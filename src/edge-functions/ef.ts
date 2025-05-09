@@ -1,24 +1,21 @@
 import { getStore } from "@netlify/blobs";
-import { NetlifyExtensionClient, type NetlifySDKContext } from "@netlify/sdk";
 // @ts-ignore
 import type { IResult } from "https://deno.land/x/ua_parser_js@2.0.3/src/main/ua-parser.d.ts";
 // @ts-ignore
 import { UAParser } from "https://deno.land/x/ua_parser_js@2.0.3/src/main/ua-parser.mjs";
+import type { Context, Config } from "@netlify/edge-functions";
 
-let debugMessage = '';
+let debugMessage = `New request set at: ${new Date()}\n`;
 let debug = false;
 
-export default async (request: Request, context: NetlifySDKContext) => {
-  console.log("this is working!")
-  const { client, teamId, siteId } = context;
-  if (!teamId || !siteId) {
-    throw new Error(
-      "teamId and siteId are required");
-  } else {
-    const siteConfig = await client.getSiteConfiguration(teamId, siteId);
-    debug = siteConfig?.config?.logEdgeFunction ? siteConfig?.config?.logEdgeFunction : false
-  }
-  debugMessage += (`Request URL: ${request.url}`);
+export default async (request: Request, context: Context) => {
+
+  const debugEnv = Netlify.env.get("BASELINE_ANALYTICS_DEBUG_EDGE_FUNCTION") ? Netlify.env.get("BASELINE_ANALYTICS_DEBUG_EDGE_FUNCTION") : 'false';
+
+  debug = (debugEnv == 'true' || debugEnv == 'TRUE') ? true : false;
+
+  debugMessage += (`Request URL: ${request.url}\n`);
+
   const userAgent = request.headers.get("user-agent");
   if (userAgent === null || userAgent === "") {
     return;
@@ -69,9 +66,6 @@ export const config = {
   ],
   onError: "bypass",
 };
-
-// const debug = Netlify.env.get("BASELINE_EXTENSION_DEBUG_EF") ? Netlify.env.get("BASELINE_EXTENSION_DEBUG_EF") : "false";
-
 
 // This is a mapping of browser names from UAParser to the names used in the blob
 // and the type of version (single or double)
@@ -194,7 +188,7 @@ const getBrowserNameAndVersion = (ua: IResult, userAgent: string): {
     result.version = ua.browser.version;
     return result;
   } else {
-    debugMessage += `UAParser result", browser.name=${ua.browser.name}, browser.version=${ua.browser.version}, device.vendor=${ua.device.vendor}, device.type=${ua.device.type}\n`;
+    debugMessage += `UAParser result: browser.name=${ua.browser.name}, browser.version=${ua.browser.version}, device.vendor=${ua.device.vendor}, device.type=${ua.device.type}\n`;
   }
 
   if (ua.device.type === "mobile" && ua.device.vendor === "Apple" && ua.browser.name != "Mobile Safari") {
@@ -234,7 +228,7 @@ const getBrowserNameAndVersion = (ua: IResult, userAgent: string): {
 
 async function incrementInBlob(userAgent: string): Promise<void> {
 
-  debugMessage += `${userAgent}\n`
+  debugMessage += `UA: ${userAgent}\n`
 
   const ua = UAParser(userAgent) as IResult;
 
@@ -286,7 +280,7 @@ async function incrementInBlob(userAgent: string): Promise<void> {
   // END: Baseline code
 
   await store.setJSON(key, current).then(() => {
-    debugMessage += `Incremented ${browserName} version ${version} count in key ${key} by 1`
+    debugMessage += `Incremented ${browserName} version ${version} count in key ${key} by 1\n`
   });
 
   if (debug) console.log(debugMessage);
