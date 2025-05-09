@@ -170,7 +170,7 @@ const processAnalyticsData = (
   if (debugUi) {
     output = {
       ...output,
-      debugData: data
+      debugData: data,
     }
   }
 
@@ -437,7 +437,8 @@ export const Analytics = () => {
           }
 
           <pre hidden={!processedData.debugUi}>
-            {JSON.stringify(processedData, null, 2)};
+            {JSON.stringify(processedData, null, 2)}
+            {JSON.stringify(analyticsData.data, null, 2)}
           </pre>
         </div>
       }

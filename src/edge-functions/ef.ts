@@ -1,11 +1,24 @@
 import { getStore } from "@netlify/blobs";
+import { NetlifyExtensionClient, type NetlifySDKContext } from "@netlify/sdk";
 // @ts-ignore
 import type { IResult } from "https://deno.land/x/ua_parser_js@2.0.3/src/main/ua-parser.d.ts";
 // @ts-ignore
 import { UAParser } from "https://deno.land/x/ua_parser_js@2.0.3/src/main/ua-parser.mjs";
 
-export default (request: Request) => {
-  if (debug) console.log("Request URL", request.url);
+let debugMessage = '';
+let debug = false;
+
+export default async (request: Request, context: NetlifySDKContext) => {
+  console.log("this is working!")
+  const { client, teamId, siteId } = context;
+  if (!teamId || !siteId) {
+    throw new Error(
+      "teamId and siteId are required");
+  } else {
+    const siteConfig = await client.getSiteConfiguration(teamId, siteId);
+    debug = siteConfig?.config?.logEdgeFunction ? siteConfig?.config?.logEdgeFunction : false
+  }
+  debugMessage += (`Request URL: ${request.url}`);
   const userAgent = request.headers.get("user-agent");
   if (userAgent === null || userAgent === "") {
     return;
@@ -57,7 +70,8 @@ export const config = {
   onError: "bypass",
 };
 
-const debug = Netlify.env.get("BASELINE_EXTENSION_DEBUG_EF") ? Netlify.env.get("BASELINE_EXTENSION_DEBUG_EF") : "false";
+// const debug = Netlify.env.get("BASELINE_EXTENSION_DEBUG_EF") ? Netlify.env.get("BASELINE_EXTENSION_DEBUG_EF") : "false";
+
 
 // This is a mapping of browser names from UAParser to the names used in the blob
 // and the type of version (single or double)
@@ -174,24 +188,24 @@ const getBrowserNameAndVersion = (ua: IResult, userAgent: string): {
     version: "",
   }
 
-  if (debug) console.log("UAParser result", ua.browser.name, ua.browser.version, ua.device.vendor, ua.device.type);
-
   if (!browserMappings.hasOwnProperty(ua.browser.name)) {
-    console.log(new Error(`Browser ${ua.browser.name} not recognized.  Full UserAgent is: \n${userAgent}`));
+    debugMessage += ((`Browser ${ua.browser.name} will not be mapped to a browser in baseline-browser-mapping.\n`));
     result.browserName = ua.browser.name;
-    result.version = "unknown";
+    result.version = ua.browser.version;
     return result;
+  } else {
+    debugMessage += `UAParser result", browser.name=${ua.browser.name}, browser.version=${ua.browser.version}, device.vendor=${ua.device.vendor}, device.type=${ua.device.type}\n`;
   }
 
   if (ua.device.type === "mobile" && ua.device.vendor === "Apple" && ua.browser.name != "Mobile Safari") {
-    if (debug) console.log("detected iOS device with non-Safari browser");
+    debugMessage += ("detected iOS device with non-Safari browser\n");
     // For non-Safari iOS browsers, we need to use the OS version
     // instead of the browser version, because the browser version
     // doesn't tell us anything about which version of WebKit
     // is being used.
     const versionParts = ua.os.version.split(".");
     result.version =
-      !versionParts[1] || versionParts[1] == "0"
+      !versionParts[1] || versionParts[1] == "0" || versionParts[1] != 'unknown'
         ? `${versionParts[0]}`
         : `${versionParts[0]}.${versionParts[1]}`;
     result.browserName = "safari_ios";
@@ -220,6 +234,8 @@ const getBrowserNameAndVersion = (ua: IResult, userAgent: string): {
 
 async function incrementInBlob(userAgent: string): Promise<void> {
 
+  debugMessage += `${userAgent}\n`
+
   const ua = UAParser(userAgent) as IResult;
 
   if (
@@ -227,7 +243,8 @@ async function incrementInBlob(userAgent: string): Promise<void> {
     botsAndCrawlers.some(bot => userAgent.includes(bot)) ||
     botsAndCrawlers.some(bot => ua.name === bot)
   ) {
-    if (debug) console.log(`Crawler detected, will not count.\nUserAgent is: ${userAgent}`);
+    debugMessage += `Crawler detected, will not count.\n`;
+    if (debug) console.log(debugMessage);
     return
   }
 
@@ -247,7 +264,7 @@ async function incrementInBlob(userAgent: string): Promise<void> {
   let browserName: string = "";
   let version: string = "";
   if (ua.browser.name === undefined) {
-    console.log(new Error(`Browser name is undefined.\nUserAgent is: ${userAgent}`));
+    debugMessage += (`Browser name is undefined.\n`);
     browserName = "undefined";
     version = "unknown";
   }
@@ -269,8 +286,10 @@ async function incrementInBlob(userAgent: string): Promise<void> {
   // END: Baseline code
 
   await store.setJSON(key, current).then(() => {
-    if (debug) console.log(`Incremented ${browserName} version ${version} count in key ${key} by 1`);
+    debugMessage += `Incremented ${browserName} version ${version} count in key ${key} by 1`
   });
+
+  if (debug) console.log(debugMessage);
 
   // clean up all stats excluding last 7 days
   const expectedDates = new Set(
@@ -283,7 +302,10 @@ async function incrementInBlob(userAgent: string): Promise<void> {
   const { blobs: allCounts } = await store.list({ prefix: "counts/" });
   for (const blob of allCounts) {
     if (!expectedDates.has(blob.key.split("/")[1])) {
-      await store.delete(blob.key);
+      await store.delete(blob.key).then(value => {
+        console.log(`Cleared blob ${blob.key}`)
+      });
     }
   }
+  return
 }
