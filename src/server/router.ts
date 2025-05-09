@@ -159,6 +159,7 @@ export const appRouter = router({
         z.object({
           debugUi: z.boolean().optional(),
           logEdgeFunction: z.boolean().optional(),
+          redeploy: z.boolean().optional(),
         })
       )
       // .mutation(async ({ ctx: { teamId, siteId, client }, input }) => {
@@ -166,7 +167,7 @@ export const appRouter = router({
         const { ctx, input } = opts;
         const { teamId, siteId, client } = ctx;
 
-        console.log("setAnalyticsMode", input);
+        console.log("setDebugSettings", input);
         if (!teamId || !siteId) {
           throw new TRPCError({
             code: "BAD_REQUEST",
@@ -174,22 +175,30 @@ export const appRouter = router({
           });
         }
         try {
-          let currentConfig: any =
-            (await client.getSiteConfiguration(teamId, siteId))?.config ??
-            ({
-              debugUi: false,
-            } satisfies SiteSettings);
-          await client.upsertSiteConfiguration(teamId, siteId, {
-            ...currentConfig,
-            ...input,
-          });
-          await client.createOrUpdateVariable({
-            accountId: teamId,
-            siteId,
-            key: "BASELINE_ANALYTICS_DEBUG_EDGE_FUNCTION",
-            value: `${input.logEdgeFunction}`,
-            scopes: ["builds"],
-          });
+          if (input.debugUi != undefined) {
+            let currentConfig: any =
+              (await client.getSiteConfiguration(teamId, siteId))?.config ??
+              ({
+                debugUi: false,
+              } satisfies SiteSettings);
+            await client.upsertSiteConfiguration(teamId, siteId, {
+              ...currentConfig,
+              ...input,
+            });
+          }
+          if (input.logEdgeFunction != undefined) {
+            await client.createOrUpdateVariable({
+              accountId: teamId,
+              siteId,
+              key: "BASELINE_ANALYTICS_DEBUG_EDGE_FUNCTION",
+              value: `${input.logEdgeFunction}`,
+              scopes: ["builds"],
+            });
+          }
+          if (input.redeploy) {
+            console.log("Attempting to redeploy site");
+            await client.redeploySite({ siteId });
+          }
         }
         catch (e: any) {
           throw new TRPCError({
@@ -197,7 +206,6 @@ export const appRouter = router({
             message: "Failed to save team configuration",
             cause: e,
           });
-
         }
       }),
 

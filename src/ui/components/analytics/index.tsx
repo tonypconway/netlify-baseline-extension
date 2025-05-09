@@ -404,7 +404,8 @@ export const Analytics = () => {
             className="tw-mr-4 tw-mb-4 sm:tw-mb-0"
             onClick={async () => {
               await setDebugOptionsMutation.mutateAsync({
-                logEdgeFunction: !debugSettings.data?.logEdgeFunction
+                logEdgeFunction: !debugSettings.data?.logEdgeFunction,
+                redeploy: true
               });
             }}>{debugSettings.data?.logEdgeFunction ? 'Disable' : 'Enable'} Edge function logging</Button>
 
