@@ -169,7 +169,10 @@ const botsAndCrawlers = [
   "Statping-ng",
   "DotBot",
   "dotbot",
-  "YisouSpider"
+  "YisouSpider",
+  "semrush",
+  "rss-parser",
+  "Amazonbot"
 ];
 
 const getBrowserNameAndVersion = (ua: IResult, userAgent: string): {
@@ -234,7 +237,9 @@ async function incrementInBlob(userAgent: string): Promise<void> {
 
   if (
     ua.type == "crawler" ||
-    botsAndCrawlers.some(bot => userAgent.includes(bot)) ||
+    botsAndCrawlers.some(bot =>
+      (userAgent.includes(bot) || userAgent.includes(bot.toLowerCase()))
+    ) ||
     botsAndCrawlers.some(bot => ua.name === bot)
   ) {
     debugMessage += `Crawler detected, will not count.\n`;
