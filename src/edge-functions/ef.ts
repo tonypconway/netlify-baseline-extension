@@ -2,10 +2,10 @@ import { getStore } from "@netlify/blobs";
 // @ts-ignore
 import type { IResult } from "https://deno.land/x/ua_parser_js@2.0.3/src/main/ua-parser.d.ts";
 // @ts-ignore
-import { UAParser } from "https://deno.land/x/ua_parser_js@2.0.3/src/main/ua-parser.mjs";
+// import { UAParser } from "https://deno.land/x/ua_parser_js@2.0.3/src/main/ua-parser.mjs";
+import { UAParser } from 'ua-parser-js'
+import { isBot, isAIBot } from 'ua-parser-js/helpers'
 
-
-let debugMessage = `New request set at: ${new Date()}\n`;
 let debug = false;
 
 export default async (request: Request) => {
@@ -14,13 +14,11 @@ export default async (request: Request) => {
 
   debug = (debugEnv == 'true' || debugEnv == 'TRUE') ? true : false;
 
-  debugMessage += (`Request URL: ${request.url}\n`);
-
   const userAgent = request.headers.get("user-agent");
   if (userAgent === null || userAgent === "") {
     return;
   }
-  setTimeout(() => incrementInBlob(userAgent), 0);
+  setTimeout(() => incrementInBlob(userAgent, request.url), 0);
 };
 
 export const config = {
@@ -172,7 +170,8 @@ const botsAndCrawlers = [
   "YisouSpider",
   "semrush",
   "rss-parser",
-  "Amazonbot"
+  "Amazonbot",
+  "perplexity"
 ];
 
 const getBrowserNameAndVersion = (ua: IResult, userAgent: string): {
@@ -186,16 +185,12 @@ const getBrowserNameAndVersion = (ua: IResult, userAgent: string): {
   }
 
   if (!browserMappings.hasOwnProperty(ua.browser.name)) {
-    debugMessage += ((`Browser ${ua.browser.name} will not be mapped to a browser in baseline-browser-mapping.\n`));
     result.browserName = ua.browser.name;
     result.version = ua.browser.version;
     return result;
-  } else {
-    debugMessage += `UAParser result: browser.name=${ua.browser.name}, browser.version=${ua.browser.version}, device.vendor=${ua.device.vendor}, device.type=${ua.device.type}\n`;
   }
 
   if (ua.device.type === "mobile" && ua.device.vendor === "Apple" && ua.browser.name != "Mobile Safari") {
-    debugMessage += ("detected iOS device with non-Safari browser\n");
     // For non-Safari iOS browsers, we need to use the OS version
     // instead of the browser version, because the browser version
     // doesn't tell us anything about which version of WebKit
@@ -229,21 +224,30 @@ const getBrowserNameAndVersion = (ua: IResult, userAgent: string): {
 
 };
 
-async function incrementInBlob(userAgent: string): Promise<void> {
+async function incrementInBlob(
+  userAgent: string, requestUrl: string
+): Promise<void> {
 
-  debugMessage += `UA: ${userAgent}\n`
+  const requestTime = new Date().toISOString();
 
   const ua = UAParser(userAgent) as IResult;
 
   if (
+    isBot(userAgent) ||
+    isAIBot(userAgent) ||
     ua.type == "crawler" ||
     botsAndCrawlers.some(bot =>
       (userAgent.includes(bot) || userAgent.includes(bot.toLowerCase()))
     ) ||
     botsAndCrawlers.some(bot => ua.name === bot)
   ) {
-    debugMessage += `Crawler detected, will not count.\n`;
-    if (debug) console.log(debugMessage);
+    if (debug) {
+      console.log(
+        `RequestTime=${requestTime}\n` +
+        `UserAgent=${userAgent}\n` +
+        `Crawler detected, this impression will not be recorded.`
+      )
+    };
     return
   }
 
@@ -263,7 +267,6 @@ async function incrementInBlob(userAgent: string): Promise<void> {
   let browserName: string = "";
   let version: string = "";
   if (ua.browser.name === undefined) {
-    debugMessage += (`Browser name is undefined.\n`);
     browserName = "undefined";
     version = "unknown";
   }
@@ -276,6 +279,7 @@ async function incrementInBlob(userAgent: string): Promise<void> {
   if (!current.hasOwnProperty(browserName)) {
     current[browserName] = {};
   }
+
   if (!current[browserName].hasOwnProperty(version)) {
     current[browserName][version] = {
       "count": 0
@@ -285,10 +289,26 @@ async function incrementInBlob(userAgent: string): Promise<void> {
   // END: Baseline code
 
   await store.setJSON(key, current).then(() => {
-    debugMessage += `Incremented ${browserName} version ${version} count in key ${key} by 1\n`
+    // debugMessage += `Incremented ${browserName} version ${version} count in key ${key} by 1\n`
   });
 
-  if (debug) console.log(debugMessage);
+  if (debug) {
+    console.log(
+      `RequestTime=${requestTime}\n` +
+      `RequestUrl=${requestUrl}\n` +
+      `UserAgent=${userAgent}\n` +
+      (!browserMappings.hasOwnProperty(ua.browser.name)
+        ? `Browser ${ua.browser.name} will not be mapped to a browser in baseline-browser-mapping.\n`
+        : ``) +
+      ((ua.device.type === "mobile" && ua.device.vendor === "Apple" && ua.browser.name != "Mobile Safari")
+        ? `detected iOS device with non-Safari browser\n`
+        : ``) +
+      (!browserMappings.hasOwnProperty(ua.browser.name)
+        ? `Browser ${ua.browser.name} will not be mapped to a browser in baseline-browser-mapping.\n`
+        : `UAParserResult: browser.name = ${ua.browser.name}, browser.version = ${ua.browser.version}, device.vendor = ${ua.device.vendor}, device.type = ${ua.device.type}\n` +
+        `Incremented ${browserName} version ${version} count in key ${key} by 1\n`)
+    )
+  };
 
   // clean up all stats excluding last 7 days
   const expectedDates = new Set(
