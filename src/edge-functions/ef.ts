@@ -3,18 +3,16 @@ import { getStore } from "@netlify/blobs";
 import type { IResult } from "https://deno.land/x/ua_parser_js@2.0.3/src/main/ua-parser.d.ts";
 // @ts-ignore
 import { UAParser } from "https://deno.land/x/ua_parser_js@2.0.3/src/main/ua-parser.mjs";
-import type { Context, Config } from "@netlify/edge-functions";
+
 
 let debugMessage = `New request set at: ${new Date()}\n`;
-let debug = true;
+let debug = false;
 
-export default async (request: Request, context: Context) => {
-
-  console.log(JSON.stringify(Netlify.env.get('BASELINE_ANALYTICS_DEBUG_EDGE_FUNCTION')))
+export default async (request: Request) => {
 
   const debugEnv = Netlify.env.get("BASELINE_ANALYTICS_DEBUG_EDGE_FUNCTION") ? Netlify.env.get("BASELINE_ANALYTICS_DEBUG_EDGE_FUNCTION") : 'false';
 
-  // debug = (debugEnv == 'true' || debugEnv == 'TRUE') ? true : false;
+  debug = (debugEnv == 'true' || debugEnv == 'TRUE') ? true : false;
 
   debugMessage += (`Request URL: ${request.url}\n`);
 
