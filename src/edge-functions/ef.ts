@@ -6,18 +6,11 @@ import { UAParser } from '../ua-parser-js/main/ua-parser.mjs'
 // @ts-ignore
 import { isBot, isAIBot } from '../ua-parser-js/helpers/ua-parser-helpers.mjs'
 
-let debug = false;
+const debug = !!Netlify.env.get("BASELINE_ANALYTICS_DEBUG_EDGE_FUNCTION");
 
 export default async (request: Request) => {
 
-  console.log("BASELINE_ANALYTICS_DEBUG_EDGE_FUNCTION=", Netlify.env.get("BASELINE_ANALYTICS_DEBUG_EDGE_FUNCTION"))
-
-  const debugEnv = Netlify.env.get("BASELINE_ANALYTICS_DEBUG_EDGE_FUNCTION") ? Netlify.env.get("BASELINE_ANALYTICS_DEBUG_EDGE_FUNCTION") : 'false';
-
-  debug = (debugEnv == 'true' || debugEnv == 'TRUE') ? true : false;
-
-  // Forcing debug to true temporarily for testing purposes
-  debug = true;
+  console.log("BASELINE_ANALYTICS_DEBUG_EDGE_FUNCTION=", debug);
 
   const userAgent = request.headers.get("user-agent");
   if (userAgent === null || userAgent === "") {
