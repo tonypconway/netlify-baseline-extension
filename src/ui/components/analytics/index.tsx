@@ -132,7 +132,7 @@ const processAnalyticsData = (
   };
   let thisYear = new Date().getFullYear();
 
-  let baselineYears = [...Array(thisYear).keys()].slice(2016).reduce((acc, year) => {
+  let baselineYears = [...Array(thisYear).keys()].slice(2015).reduce((acc, year) => {
     return { ...acc, [year.toString()]: { year: year, count: 0 } }
   }, {} as { [key: string]: { year: number, count: number } });
 
@@ -140,15 +140,35 @@ const processAnalyticsData = (
 
   Object.entries(flattenedData).forEach(([browserName, versions]) => {
     Object.entries(versions).forEach(([version, { count }]) => {
-      if (bbm[browserName] && bbm[browserName][version]) {
-        const versionYear: string = bbm[browserName][version]?.year;
-        const waCompatible: boolean = ['widely', 'newly'].includes(bbm[browserName][version]?.supports);
-        const naCompatible: boolean = bbm[browserName][version]?.supports === 'newly';
+      let isRecognised = false;
+      let safariZeroVersion = false;
+      if (bbm[browserName] && bbm[browserName][version]) isRecognised = true;
+      if (['safari', 'safari_ios'].includes(browserName)) {
+        if (version.split('.')[1] === '0') {
+          let majVersion = version.split('.')[0].toString();
+          if (bbm[browserName][majVersion]) {
+            if (bbm[browserName][majVersion].year != 'pre_baseline') {
+              safariZeroVersion = true;
+              isRecognised = true;
+            }
+          }
+        }
+      }
+      if (
+        isRecognised
+      ) {
+        let scopedVersion = !safariZeroVersion ? version : version.split('.')[0]
+        const versionYear: string = bbm[browserName][scopedVersion]?.year;
+        const waCompatible: boolean = ['widely', 'newly'].includes(bbm[browserName][scopedVersion]?.supports);
+        const naCompatible: boolean = bbm[browserName][scopedVersion]?.supports === 'newly';
         baselineYears[versionYear].count += count;
         waCompatibleWeights[waCompatible.toString()] += count;
         naCompatibleWeights[naCompatible.toString()] += count;
       }
-      else totalUnrecognisedImpressions += Object.values(versions).reduce((acc, { count }) => acc + count, 0);
+      else {
+        console.log(`didn't recognise ${browserName} ${version}`)
+        totalUnrecognisedImpressions += Object.values(versions).reduce((acc, { count }) => acc + count, 0)
+      };
     })
   });
 
