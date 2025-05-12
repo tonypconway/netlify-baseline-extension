@@ -5,10 +5,14 @@ import type { IResult } from "../ua-parser-main/main/ua-parser.d.ts"
 import { UAParser } from '../ua-parser-js/main/ua-parser.mjs'
 // @ts-ignore
 import { isBot, isAIBot } from '../ua-parser-js/helpers/ua-parser-helpers.mjs'
+import { env } from 'node:process'
 
 let debug = false;
 
 export default async (request: Request) => {
+
+
+  console.log(env['BASELINE_ANALYTICS_DEBUG_EDGE_FUNCTION']);
 
   console.log("BASELINE_ANALYTICS_DEBUG_EDGE_FUNCTION=", Netlify.env.get("BASELINE_ANALYTICS_DEBUG_EDGE_FUNCTION"))
 
