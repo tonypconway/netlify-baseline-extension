@@ -249,7 +249,7 @@ async function incrementInBlob(
       console.log(
         `RequestTime=${requestTime}\n` +
         `UserAgent=${userAgent}\n` +
-        `Crawler detected, this impression will not be recorded.`
+        `Crawler detected, this impression will not be recorded.\n`
       )
     };
     return
