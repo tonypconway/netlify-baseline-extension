@@ -2,7 +2,7 @@ import { getStore } from "@netlify/blobs";
 // @ts-ignore
 import type { IResult } from "../ua-parser-js/main/ua-parser.d.ts";
 // @ts-ignore
-import { UAParser } from "../ua-parser-js/main/ua-parser.js";
+import { UAParser } from "../ua-parser-js/main/ua-parser.mjs";
 // @ts-ignore
 import { isBot, isAIBot } from '../ua-parser-js/helpers/ua-parser-helpers.mjs'
 
