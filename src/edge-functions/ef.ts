@@ -12,11 +12,14 @@ let debug = false;
 
 export default async (request: Request) => {
 
-  console.log("running", Deno.env.get("BASELINE_ANALYTICS_DEBUG_EDGE_FUNCTION"));
+  console.log("BASELINE_ANALYTICS_DEBUG_EDGE_FUNCTION=", Netlify.env.get("BASELINE_ANALYTICS_DEBUG_EDGE_FUNCTION"))
 
-  const debugEnv = Deno.env.get("BASELINE_ANALYTICS_DEBUG_EDGE_FUNCTION") ? Deno.env.get("BASELINE_ANALYTICS_DEBUG_EDGE_FUNCTION") : 'false';
+  const debugEnv = Netlify.env.get("BASELINE_ANALYTICS_DEBUG_EDGE_FUNCTION") ? Netlify.env.get("BASELINE_ANALYTICS_DEBUG_EDGE_FUNCTION") : 'false';
 
   debug = (debugEnv == 'true' || debugEnv == 'TRUE') ? true : false;
+
+  // Forcing debug to true temporarily for testing purposes
+  debug = true;
 
   const userAgent = request.headers.get("user-agent");
   if (userAgent === null || userAgent === "") {
