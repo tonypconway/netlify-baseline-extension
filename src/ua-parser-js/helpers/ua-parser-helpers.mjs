@@ -14,9 +14,9 @@
 import { UAParser } from '../main/ua-parser.mjs';
 import { CPU, OS, Engine } from '../enums/ua-parser-enums.mjs';
 import { Bots } from '../extensions/ua-parser-extensions.mjs';
-import { isFromEU } from 'detect-europe-js';
-import { isFrozenUA } from 'ua-is-frozen';
-import { isStandalonePWA } from 'is-standalone-pwa';
+import { isFromEU } from './detect-europe-js/index.js';
+import { isFrozenUA } from './ua-is-frozen/index.js';
+import { isStandalonePWA } from './is-standalone-pwa/index.js';
 
 const toResult = (value, head, ext) => typeof value === 'string' ? UAParser(value, head, ext) : value;
 

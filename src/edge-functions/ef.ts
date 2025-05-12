@@ -6,15 +6,15 @@ import type { IResult } from "../ua-parser-main/main/ua-parser.d.ts"
 // import { UAParser } from "https://deno.land/x/ua_parser_js@2.0.3/src/main/ua-parser.mjs";
 import { UAParser } from '../ua-parser-js/main/ua-parser.mjs'
 // @ts-ignore
-// import { isBot, isAIBot } from '../ua-parser-js/helpers/ua-parser-helpers.mjs'
+import { isBot, isAIBot } from '../ua-parser-js/helpers/ua-parser-helpers.mjs'
 
 let debug = false;
 
 export default async (request: Request) => {
 
-  console.log("running", Netlify.env.get("BASELINE_ANALYTICS_DEBUG_EDGE_FUNCTION"));
+  console.log("running", Deno.env.get("BASELINE_ANALYTICS_DEBUG_EDGE_FUNCTION"));
 
-  const debugEnv = Netlify.env.get("BASELINE_ANALYTICS_DEBUG_EDGE_FUNCTION") ? Netlify.env.get("BASELINE_ANALYTICS_DEBUG_EDGE_FUNCTION") : 'false';
+  const debugEnv = Deno.env.get("BASELINE_ANALYTICS_DEBUG_EDGE_FUNCTION") ? Deno.env.get("BASELINE_ANALYTICS_DEBUG_EDGE_FUNCTION") : 'false';
 
   debug = (debugEnv == 'true' || debugEnv == 'TRUE') ? true : false;
 
@@ -237,8 +237,8 @@ async function incrementInBlob(
   const ua = UAParser(userAgent) as IResult;
 
   if (
-    // isBot(userAgent) ||
-    // isAIBot(userAgent) ||
+    isBot(userAgent) ||
+    isAIBot(userAgent) ||
     botsAndCrawlers.some(bot =>
       (userAgent.includes(bot) || userAgent.includes(bot.toLowerCase()))
     ) ||
