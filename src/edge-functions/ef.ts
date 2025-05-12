@@ -1,10 +1,10 @@
 import { getStore } from "@netlify/blobs";
 // @ts-ignore
-import type { IResult } from "https://deno.land/x/ua_parser_js@2.0.3/src/main/ua-parser.d.ts";
+import type { IResult } from "../ua-parser-js/main/ua-parser.d.ts";
 // @ts-ignore
-// import { UAParser } from "https://deno.land/x/ua_parser_js@2.0.3/src/main/ua-parser.mjs";
-import { UAParser } from 'ua-parser-js'
-import { isBot, isAIBot } from 'ua-parser-js/helpers'
+import { UAParser } from "../ua-parser-js/main/ua-parser.js";
+// @ts-ignore
+import { isBot, isAIBot } from '../ua-parser-js/helpers/ua-parser-helpers.mjs'
 
 let debug = false;
 
@@ -184,9 +184,9 @@ const getBrowserNameAndVersion = (ua: IResult, userAgent: string): {
     version: "",
   }
 
-  if (!browserMappings.hasOwnProperty(ua.browser.name)) {
-    result.browserName = ua.browser.name;
-    result.version = ua.browser.version;
+  if (!browserMappings.hasOwnProperty(ua.browser.name ?? 'unknown')) {
+    result.browserName = ua.browser.name ?? 'unknown';
+    result.version = ua.browser.version ?? 'unknown';
     return result;
   }
 
@@ -195,7 +195,7 @@ const getBrowserNameAndVersion = (ua: IResult, userAgent: string): {
     // instead of the browser version, because the browser version
     // doesn't tell us anything about which version of WebKit
     // is being used.
-    const versionParts = ua.os.version.split(".");
+    const versionParts = (ua.os.version ?? "").split(".");
     result.version =
       !versionParts[1] || versionParts[1] == "0" || versionParts[1] != 'unknown'
         ? `${versionParts[0]}`
@@ -204,11 +204,11 @@ const getBrowserNameAndVersion = (ua: IResult, userAgent: string): {
     return result;
   }
 
-  const browserMapping = browserMappings[ua.browser.name];
-  result.browserName = browserMapping.shortName ?? ua.browser.name;
+  const browserMapping = browserMappings[ua.browser.name ?? 'unknown'];
+  result.browserName = browserMapping.shortName ? browserMapping.shortName : ua.browser.name ?? 'unknown';
 
   // Split the version string into parts
-  const versionParts = ua.browser.version.split(".");
+  const versionParts = (ua.browser.version ?? 'unknown').split(".");
 
   if (browserMapping.versionType === "double") {
     // For double version types, we need to split the 
@@ -235,11 +235,10 @@ async function incrementInBlob(
   if (
     isBot(userAgent) ||
     isAIBot(userAgent) ||
-    ua.type == "crawler" ||
     botsAndCrawlers.some(bot =>
       (userAgent.includes(bot) || userAgent.includes(bot.toLowerCase()))
     ) ||
-    botsAndCrawlers.some(bot => ua.name === bot)
+    botsAndCrawlers.some(bot => ua.browser.name === bot)
   ) {
     if (debug) {
       console.log(
@@ -297,13 +296,13 @@ async function incrementInBlob(
       `RequestTime=${requestTime}\n` +
       `RequestUrl=${requestUrl}\n` +
       `UserAgent=${userAgent}\n` +
-      (!browserMappings.hasOwnProperty(ua.browser.name)
+      (!browserMappings.hasOwnProperty(ua.browser.name ?? 'unknown')
         ? `Browser ${ua.browser.name} will not be mapped to a browser in baseline-browser-mapping.\n`
         : ``) +
       ((ua.device.type === "mobile" && ua.device.vendor === "Apple" && ua.browser.name != "Mobile Safari")
         ? `detected iOS device with non-Safari browser\n`
         : ``) +
-      (!browserMappings.hasOwnProperty(ua.browser.name)
+      (!browserMappings.hasOwnProperty(ua.browser.name ?? 'unknown')
         ? `Browser ${ua.browser.name} will not be mapped to a browser in baseline-browser-mapping.\n`
         : `UAParserResult: browser.name = ${ua.browser.name}, browser.version = ${ua.browser.version}, device.vendor = ${ua.device.vendor}, device.type = ${ua.device.type}\n` +
         `Incremented ${browserName} version ${version} count in key ${key} by 1\n`)
