@@ -3,7 +3,7 @@ import { getStore } from "@netlify/blobs";
 import type { IResult } from "https://deno.land/x/ua_parser_js@2.0.3/src/main/ua-parser.d.ts";
 // @ts-ignore
 // import { UAParser } from "https://deno.land/x/ua_parser_js@2.0.3/src/main/ua-parser.mjs";
-import { UAParser } from '../ua-parser-js/main/ua-parser.js'
+import { UAParser } from '../ua-parser-js/main/ua-parser.mjs'
 // @ts-ignore
 // import { isBot, isAIBot } from '../ua-parser-js/helpers/ua-parser-helpers.mjs'
 
