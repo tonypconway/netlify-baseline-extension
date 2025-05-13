@@ -375,7 +375,7 @@ export const Analytics = () => {
           {processedData.totalPreBaselineImpressions} requests were from recognised browsers that predate Baseline 2015.<br />
           {processedData.totalUnrecognisedImpressions} requests were from browsers that this extension was not able to not categorise.  These requests are likely to be from browsers that are not tracked in the baseline-browser-mapping module and  unrecognised crawler agents.  Some of these browsers  will support the Baseline feature sets mentioned above, but there is insufficient information to map them to a feature set.
         </p>
-        <p>
+        <p className="tw-text-sm">
           Requests from crawlers and bots should be filtered out.  If you are seeing a large volume of impressions from a crawler when Edge Function debugging is enabled, please make a pull request to add it to the <a href="https://github.com/tonypconway/netlify-baseline-extension/blob/6881588be412970abf96143519391025ebf4e339/src/edge-functions/ef.ts#L128-L164">filter list</a> in the extension code.  Be aware that crawlers and unidentifiable browsers are not used to calculate the figures in the charts above.
         </p>
       </div>
