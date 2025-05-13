@@ -225,7 +225,6 @@ async function incrementInBlob(
   const debugEnv = Netlify.env.get("BASELINE_ANALYTICS_DEBUG_EDGE_FUNCTION") ?? 'false';
 
   const debug = (['true', 'TRUE'].includes(debugEnv)) ? true : false;
-  console.log("debug=", debug);
 
   const requestTime = new Date().toISOString();
 
