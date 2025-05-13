@@ -304,7 +304,6 @@ export const Analytics = () => {
             </tr>
             {
               Object.entries(processedData.baselineYears)
-                // Only show a year if it represents greater than 0.05% of overall impressions
                 .filter(([_, { year }]) => year != 'pre_baseline')
                 .map(([year], index, array) => (
                   <tr
@@ -374,10 +373,10 @@ export const Analytics = () => {
         <p className="tw-text-sm">
           {processedData.totalRecognisedImpressions} requests were made to your site from browsers that this extension was able to categorise.<br />
           {processedData.totalPreBaselineImpressions} requests were from recognised browsers that predate Baseline 2015.<br />
-          {processedData.totalUnrecognisedImpressions} requests were from browsers that this extension was not able to not categorise.
+          {processedData.totalUnrecognisedImpressions} requests were from browsers that this extension was not able to not categorise.  These requests are likely to be from browsers that are not tracked in the baseline-browser-mapping module and  unrecognised crawler agents.  Some of these browsers  will support the Baseline feature sets mentioned above, but there is insufficient information to map them to a feature set.
         </p>
         <p>
-          Requests from crawlers and bots should be filtered out.  If you are seeing impressions in your debug data from a crawler, please make a pull request to add it to the <a href="https://github.com/tonypconway/netlify-baseline-extension/blob/6881588be412970abf96143519391025ebf4e339/src/edge-functions/ef.ts#L128-L164">filter list</a> in the extension code.  Be aware that crawlers and unidentifiable browsers are not used to calculate the figures in the charts above.
+          Requests from crawlers and bots should be filtered out.  If you are seeing a large volume of impressions from a crawler when Edge Function debugging is enabled, please make a pull request to add it to the <a href="https://github.com/tonypconway/netlify-baseline-extension/blob/6881588be412970abf96143519391025ebf4e339/src/edge-functions/ef.ts#L128-L164">filter list</a> in the extension code.  Be aware that crawlers and unidentifiable browsers are not used to calculate the figures in the charts above.
         </p>
       </div>
 
@@ -437,7 +436,7 @@ export const Analytics = () => {
                 logEdgeFunction: !debugSettings.data?.logEdgeFunction,
                 redeploy: true
               });
-            }}>{debugSettings.data?.logEdgeFunction ? 'Disable' : 'Enable'} Edge function logging</Button>
+            }}>{debugSettings.data?.logEdgeFunction ? 'Disable' : 'Enable'} Edge function logging and redeploy</Button>
 
           <Button
             className="tw-mr-4 tw-mb-4 sm:tw-mb-0"
