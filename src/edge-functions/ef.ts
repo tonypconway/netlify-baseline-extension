@@ -222,6 +222,8 @@ async function incrementInBlob(
   userAgent: string, requestUrl: string
 ): Promise<void> {
 
+  console.log(Netlify.env.get("BASELINE_ANALYTICS_DEBUG_EDGE_FUNCTION"));
+
   const debug = !!Netlify.env.get("BASELINE_ANALYTICS_DEBUG_EDGE_FUNCTION");
 
   const requestTime = new Date().toISOString();
