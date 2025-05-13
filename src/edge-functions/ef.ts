@@ -224,7 +224,7 @@ async function incrementInBlob(
 
   console.log(Netlify.env.get("BASELINE_ANALYTICS_DEBUG_EDGE_FUNCTION"));
 
-  const debug = !!Netlify.env.get("BASELINE_ANALYTICS_DEBUG_EDGE_FUNCTION");
+  let debug = !!Netlify.env.get("BASELINE_ANALYTICS_DEBUG_EDGE_FUNCTION");
 
   const requestTime = new Date().toISOString();
 
@@ -238,7 +238,7 @@ async function incrementInBlob(
     ) ||
     botsAndCrawlers.some(bot => ua.browser.name === bot)
   ) {
-    if (debug) {
+    if (debug === true) {
       console.log(
         `RequestTime=${requestTime}\n` +
         `UserAgent=${userAgent}\n` +
@@ -289,7 +289,7 @@ async function incrementInBlob(
     // debugMessage += `Incremented ${browserName} version ${version} count in key ${key} by 1\n`
   });
 
-  if (debug) {
+  if (debug === true) {
     console.log(
       `RequestTime=${requestTime}\n` +
       `RequestUrl=${requestUrl}\n` +
