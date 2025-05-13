@@ -165,7 +165,12 @@ const botsAndCrawlers = [
   "semrush",
   "rss-parser",
   "Amazonbot",
-  "perplexity"
+  "perplexity",
+  "miniflux",
+  "Chrome Privacy Preserving Prefetch Proxy",
+  "Expanse",
+  "FreshRSS",
+  "paloaltonetworks"
 ];
 
 const getBrowserNameAndVersion = (ua: IResult, userAgent: string): {
