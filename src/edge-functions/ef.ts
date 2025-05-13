@@ -6,11 +6,7 @@ import { UAParser } from '../ua-parser-js/main/ua-parser.mjs'
 // @ts-ignore
 import { isBot, isAIBot } from '../ua-parser-js/helpers/ua-parser-helpers.mjs'
 
-const debug = !!Netlify.env.get("BASELINE_ANALYTICS_DEBUG_EDGE_FUNCTION");
-
 export default async (request: Request) => {
-
-  console.log("BASELINE_ANALYTICS_DEBUG_EDGE_FUNCTION=", debug);
 
   const userAgent = request.headers.get("user-agent");
   if (userAgent === null || userAgent === "") {
@@ -225,6 +221,8 @@ const getBrowserNameAndVersion = (ua: IResult, userAgent: string): {
 async function incrementInBlob(
   userAgent: string, requestUrl: string
 ): Promise<void> {
+
+  const debug = !!Netlify.env.get("BASELINE_ANALYTICS_DEBUG_EDGE_FUNCTION");
 
   const requestTime = new Date().toISOString();
 

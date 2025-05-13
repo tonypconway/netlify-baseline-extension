@@ -91,7 +91,7 @@ export const appRouter = router({
               siteId,
               key: "BASELINE_ANALYTICS_DEBUG_EDGE_FUNCTION",
               value: "false",
-              scopes: ["builds"],
+              scopes: ["builds", "functions"],
             });
           } else {
             console.log("Attempting to delete analytics mode");
@@ -192,7 +192,7 @@ export const appRouter = router({
               siteId,
               key: "BASELINE_ANALYTICS_DEBUG_EDGE_FUNCTION",
               value: `${input.logEdgeFunction}`,
-              scopes: ["builds"],
+              scopes: ["builds", "functions"],
             });
           }
           if (input.redeploy) {
