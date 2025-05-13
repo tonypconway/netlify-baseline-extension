@@ -222,9 +222,10 @@ async function incrementInBlob(
   userAgent: string, requestUrl: string
 ): Promise<void> {
 
-  console.log(Netlify.env.get("BASELINE_ANALYTICS_DEBUG_EDGE_FUNCTION"));
+  const debugEnv = Netlify.env.get("BASELINE_ANALYTICS_DEBUG_EDGE_FUNCTION") ?? 'false';
 
-  let debug = !!Netlify.env.get("BASELINE_ANALYTICS_DEBUG_EDGE_FUNCTION");
+  const debug = (['true', 'TRUE'].includes(debugEnv)) ? true : false;
+  console.log("debug=", debug);
 
   const requestTime = new Date().toISOString();
 
