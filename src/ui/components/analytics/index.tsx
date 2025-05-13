@@ -61,6 +61,7 @@ type ProcessedData = {
   waCompatibleWeights: { [key: string]: number; };
   naCompatibleWeights: { [key: string]: number; };
   totalRecognisedImpressions: number;
+  totalPreBaselineImpressions: number;
   totalUnrecognisedImpressions: number;
   debugUi?: boolean;
   debugData?: any;
@@ -86,6 +87,7 @@ const testData: ProcessedData = {
   totalRecognisedImpressions: Object.entries(baselineYearsTest).reduce((acc, [_, { count, year }]) => {
     return year != 'pre_baseline' ? acc + count : acc
   }, 0),
+  totalPreBaselineImpressions: 500,
   totalUnrecognisedImpressions: 1000,
   waCompatibleWeights: {
     true: 66950,
@@ -134,7 +136,9 @@ const processAnalyticsData = (
 
   let baselineYears = [...Array(thisYear).keys()].slice(2015).reduce((acc, year) => {
     return { ...acc, [year.toString()]: { year: year, count: 0 } }
-  }, {} as { [key: string]: { year: number, count: number } });
+  }, {} as { [key: string]: { year: number | string, count: number } });
+
+  baselineYears["pre_baseline"] = { year: "pre_baseline", count: 0 };
 
   const flattenedData = flattenDays(data);
 
@@ -166,19 +170,22 @@ const processAnalyticsData = (
         naCompatibleWeights[naCompatible.toString()] += count;
       }
       else {
-        console.log(`didn't recognise ${browserName} ${version}`)
-        totalUnrecognisedImpressions += Object.values(versions).reduce((acc, { count }) => acc + count, 0)
+        console.log(`didn't recognise ${browserName} ${version} with ${count} impressions`)
+        totalUnrecognisedImpressions += count
       };
     })
   });
 
-  const totalRecognisedImpressions = Object.values(baselineYears).reduce((acc, { count }) => acc + count, 0);
+  const totalRecognisedImpressions = Object.values(baselineYears)
+    .filter(year => year.year != "pre_baseline")
+    .reduce((acc, { count }) => acc + count, 0);
 
   let output: ProcessedData = {
     baselineYears: baselineYears,
     waCompatibleWeights: waCompatibleWeights,
     naCompatibleWeights: naCompatibleWeights,
     totalRecognisedImpressions: totalRecognisedImpressions,
+    totalPreBaselineImpressions: baselineYears["pre_baseline"].count,
     totalUnrecognisedImpressions: totalUnrecognisedImpressions,
     debugUi: debugUi,
   };
@@ -365,7 +372,10 @@ export const Analytics = () => {
           This extension uses a Netlify edge function which is triggered by all the requests that your site receives that are not for image, video, audio, font, script, or style resources. The edge function uses <a href="https://uaparser.dev/">UAParser.js</a> to parse the user agent string and determine the browser and its version. The data is stored in a Netlify blob with a 7-day window. The browser names and versions are matched to Baseline years and Widely available support status using data from the W3C WebDX Community Group's <a href="https://npmjs.com/baseline-browser-mapping">baseline-browser-mapping</a> module.
         </p>
         <p className="tw-text-sm">
-          {processedData.totalRecognisedImpressions} requests were made to your site in the last 7 days from browsers that this extension could categorise. {processedData.totalUnrecognisedImpressions} impressions were from browsers that this extension could not categorise.</p>
+          {processedData.totalRecognisedImpressions} requests were made to your site from browsers that this extension was able to categorise.<br />
+          {processedData.totalPreBaselineImpressions} requests were from recognised browsers that predate Baseline 2015.<br />
+          {processedData.totalUnrecognisedImpressions} requests were from browsers that this extension was not able to not categorise.
+        </p>
         <p>
           Requests from crawlers and bots should be filtered out.  If you are seeing impressions in your debug data from a crawler, please make a pull request to add it to the <a href="https://github.com/tonypconway/netlify-baseline-extension/blob/6881588be412970abf96143519391025ebf4e339/src/edge-functions/ef.ts#L128-L164">filter list</a> in the extension code.  Be aware that crawlers and unidentifiable browsers are not used to calculate the figures in the charts above.
         </p>
