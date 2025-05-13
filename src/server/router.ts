@@ -84,14 +84,12 @@ export const appRouter = router({
               siteId,
               key: "BASELINE_ANALYTICS",
               value: "1",
-              scopes: ["builds"],
             });
             await client.createOrUpdateVariable({
               accountId: teamId,
               siteId,
               key: "BASELINE_ANALYTICS_DEBUG_EDGE_FUNCTION",
               value: "false",
-              scopes: ["builds", "functions"],
             });
           } else {
             console.log("Attempting to delete analytics mode");
@@ -186,13 +184,13 @@ export const appRouter = router({
               ...input,
             });
           }
+
           if (input.logEdgeFunction != undefined) {
             await client.createOrUpdateVariable({
               accountId: teamId,
               siteId,
               key: "BASELINE_ANALYTICS_DEBUG_EDGE_FUNCTION",
               value: `${input.logEdgeFunction}`,
-              scopes: ["builds", "functions"],
             });
           }
           if (input.redeploy) {
