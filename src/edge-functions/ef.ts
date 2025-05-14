@@ -167,10 +167,29 @@ const botsAndCrawlers = [
   "Amazonbot",
   "perplexity",
   "miniflux",
-  "Chrome Privacy Preserving Prefetch Proxy",
+  "Privacy Preserving Prefetch Proxy",
   "Expanse",
   "FreshRSS",
-  "paloaltonetworks"
+  "paloaltonetworks",
+  "mechanize",
+  "almalabs",
+  "almaconnect",
+  "WordPress",
+  "Micro.blog",
+  "FreshRSS",
+  "feedly",
+  "BLEXBot",
+  "wpbot",
+  "anomify.ai",
+  "Owler",
+  "DARPResearchBot",
+  "aiohttp",
+  "sindresorhus/got",
+  "ThinkChaos",
+  "Friendica",
+  "Rome Client",
+  "python-httpx",
+  "keys-so-bot"
 ];
 
 const getBrowserNameAndVersion = (ua: IResult, userAgent: string): {
@@ -239,7 +258,7 @@ async function incrementInBlob(
     isBot(userAgent) ||
     isAIBot(userAgent) ||
     botsAndCrawlers.some(bot =>
-      (userAgent.includes(bot) || userAgent.includes(bot.toLowerCase()))
+      userAgent.toLowerCase().includes(bot.toLowerCase())
     ) ||
     botsAndCrawlers.some(bot => ua.browser.name === bot)
   ) {
@@ -299,16 +318,13 @@ async function incrementInBlob(
       `RequestTime=${requestTime}\n` +
       `RequestUrl=${requestUrl}\n` +
       `UserAgent=${userAgent}\n` +
-      (!browserMappings.hasOwnProperty(ua.browser.name ?? 'unknown')
-        ? `Browser ${ua.browser.name} will not be mapped to a browser in baseline-browser-mapping.\n`
-        : ``) +
       ((ua.device.type === "mobile" && ua.device.vendor === "Apple" && ua.browser.name != "Mobile Safari")
         ? `detected iOS device with non-Safari browser\n`
         : ``) +
       (!browserMappings.hasOwnProperty(ua.browser.name ?? 'unknown')
         ? `Browser ${ua.browser.name} will not be mapped to a browser in baseline-browser-mapping.\n`
-        : `UAParserResult: browser.name = ${ua.browser.name}, browser.version = ${ua.browser.version}, device.vendor = ${ua.device.vendor}, device.type = ${ua.device.type}\n` +
-        `Incremented ${browserName} version ${version} count in key ${key} by 1\n`)
+        : `UAParserResult: browser.name = ${ua.browser.name}, browser.version = ${ua.browser.version}, device.vendor = ${ua.device.vendor}, device.type = ${ua.device.type}\n`) +
+      `Incremented ${browserName} version ${version} count in key ${key} by 1\n`
     )
   };
 
