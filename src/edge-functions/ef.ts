@@ -171,7 +171,6 @@ const botsAndCrawlers = [
   "Expanse",
   "FreshRSS",
   "paloaltonetworks",
-<<<<<<< HEAD
   "mechanize",
   "almalabs",
   "almaconnect",
@@ -190,13 +189,11 @@ const botsAndCrawlers = [
   "Friendica",
   "Rome Client",
   "python-httpx",
-  "keys-so-bot"
-=======
+  "keys-so-bot",
   "W3C_Validator",
   "InternetMeasurement",
   "anomify.ai",
   "python-httpx"
->>>>>>> 23bb3b2 (More crawlers)
 ];
 
 const getBrowserNameAndVersion = (ua: IResult, userAgent: string): {
