@@ -176,7 +176,6 @@ const botsAndCrawlers = [
   "almaconnect",
   "WordPress",
   "Micro.blog",
-  "FreshRSS",
   "feedly",
   "BLEXBot",
   "wpbot",
@@ -192,8 +191,6 @@ const botsAndCrawlers = [
   "keys-so-bot",
   "W3C_Validator",
   "InternetMeasurement",
-  "anomify.ai",
-  "python-httpx"
 ];
 
 const getBrowserNameAndVersion = (ua: IResult, userAgent: string): {
