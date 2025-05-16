@@ -191,6 +191,7 @@ const botsAndCrawlers = [
   "keys-so-bot",
   "W3C_Validator",
   "InternetMeasurement",
+  "WPMU DEV",
 ];
 
 const getBrowserNameAndVersion = (ua: IResult, userAgent: string): {
