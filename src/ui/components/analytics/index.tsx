@@ -309,7 +309,9 @@ export const Analytics = () => {
                   <tr
                     style={index == array.length - 1 ? tableStyles.bottomSectionRow : tableStyles.row}
                     key={year}>
-                    <td style={tableStyles.cell}>Baseline {year} </td>
+                    <td style={tableStyles.cell}>
+                      Baseline {year} (<a target="_blank" href={`https://webstatus.dev/?q=baseline_date%3A2015-07-29..${year}-12-31`}>features</a>)
+                    </td>
                     <td
                       style={{
                         ...tableStyles.cell,
@@ -331,7 +333,8 @@ export const Analytics = () => {
                   </tr>
                 ))}
             <tr style={tableStyles.row}>
-              <td style={tableStyles.cell}>Baseline Widely available</td>
+              <td style={tableStyles.cell}>Baseline Widely available (<a target="_blank" href={`https://webstatus.dev/?q=baseline_status%3Awidely`}>features</a>)
+              </td>
               <td style={{
                 ...tableStyles.cell,
                 ...tableStyles.widelyCell,
@@ -339,7 +342,8 @@ export const Analytics = () => {
               }}>{(processedData.waCompatibleWeights.true / processedData.totalRecognisedImpressions * 100).toFixed(1)}%</td>
             </tr>
             <tr style={tableStyles.bottomSectionRow}>
-              <td style={tableStyles.cell}>Baseline Newly available</td>
+              <td style={tableStyles.cell}>Baseline Newly available (<a target="_blank" href={`https://webstatus.dev/?q=baseline_status%3Anewly`}>features</a>)
+              </td>
               <td style={{
                 ...tableStyles.cell,
                 ...tableStyles.widelyCell,

@@ -1,7 +1,7 @@
 # yaml-language-server: $schema=https://sdk.netlify.com/sdk/config-schema.json
 config:
-  slug: ub8diyct-baseline-extension
-  name: Web Platform Baseline
+  slug: baseline
+  name: Baseline (web feature support analytics)
   scopes:
     site: ["read", "write"]
     team: ["read", "write"]
