@@ -7,7 +7,7 @@
 This extension helps you visualise which Baseline targets are available to your users.  You can use the visualisations to understand which Baseline target is suitable for you - whether it's Baseline Widely available or a Baseline year.
 
 
-![An image of the extension in use, showing the percentage of each Baseline target that are supported by the site where the extension is deployed.](assets/extension-screenshot.png)
+![An image of the extension in use, showing the percentage of each Baseline target that are supported by the site where the extension is deployed.](/assets/extension-screenshot.png)
 
 This extension uses a Netlify edge function which is triggered by all the requests that your site receives that are not for image, video, audio, font, script, or style resources. The edge function uses [UAParser.js](https://uaparser.dev/) to parse the user agent string and determine the browser and its version and filter out crawler agents. The data is stored in a Netlify blob with a 7-day window. The browser names and versions are matched to Baseline years and Widely available support status using data from the W3C WebDX Community Group's [baseline-browser-mapping](https://npmjs.com/baseline-browser-mapping) module.
 
