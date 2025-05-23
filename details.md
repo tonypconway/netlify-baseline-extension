@@ -19,8 +19,7 @@ This extension uses a Netlify edge function which is triggered by all the reques
 4. Click on "Enable analytics and deploy site". This enables the edge function and creates an environment variable called `BASELINE_ANALYTICS` which is required for the edge function to capture data.
 5. Wait for a few days to get a representative sample of your traffic.
 
-> **NOTE:**  
-> This extension uses edge functions and blobs to process and store data.  Depending on your volume of site traffic, this may have an impact on your service costs from Netlify.
+> **NOTE:** This extension uses edge functions and blobs to process and store data.  Depending on your volume of site traffic, this may have an impact on your service costs from Netlify.
 
 ## How to disable this extension
 
