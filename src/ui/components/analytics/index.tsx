@@ -20,7 +20,6 @@ const tableStyles = {
     margin: '1.5rem 0',
     tableLayout: 'fixed' as const,
     borderCollapse: 'collapse' as const,
-    color: 'white',
   },
   bottomSectionRow: {
     borderBottom: '2px solid white'
@@ -31,6 +30,9 @@ const tableStyles = {
   cell: {
     padding: '0.8em 1em',
     textAlign: 'left' as const
+  },
+  rightCell: {
+    color: 'white'
   },
   yearCell: {
     ...cellStyleTemplate,
@@ -316,6 +318,7 @@ export const Analytics = () => {
                       style={{
                         ...tableStyles.cell,
                         ...tableStyles.yearCell,
+                        ...tableStyles.rightCell,
                         backgroundPositionX: `${Math.round(
                           array
                             .slice(index)
@@ -338,6 +341,7 @@ export const Analytics = () => {
               <td style={{
                 ...tableStyles.cell,
                 ...tableStyles.widelyCell,
+                ...tableStyles.rightCell,
                 backgroundPositionX: `${Math.round(processedData.waCompatibleWeights.true / processedData.totalRecognisedImpressions * 100)}%`,
               }}>{(processedData.waCompatibleWeights.true / processedData.totalRecognisedImpressions * 100).toFixed(1)}%</td>
             </tr>
@@ -346,7 +350,8 @@ export const Analytics = () => {
               </td>
               <td style={{
                 ...tableStyles.cell,
-                ...tableStyles.widelyCell,
+                ...tableStyles.newlyCell,
+                ...tableStyles.rightCell,
                 backgroundPositionX: `${Math.round(processedData.naCompatibleWeights.true / processedData.totalRecognisedImpressions * 100)}%`,
               }}>{(processedData.naCompatibleWeights.true / processedData.totalRecognisedImpressions * 100).toFixed(1)}%</td>
             </tr>
